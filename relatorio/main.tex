@@ -27,6 +27,7 @@
 \DeclareUnicodeCharacter{2308}{\ensuremath{\lceil}}
 \DeclareUnicodeCharacter{2079}{\textsuperscript{9}}
 \graphicspath{{figuras/}}
+\setlength{\emergencystretch}{2.5em} % evita linhas estourando a coluna (nomes em \texttt e URLs)
 \input{valores.tex}
 \input{valores_extra.tex}
 
@@ -102,8 +103,9 @@ medidas e algoritmos são implementações próprias, testadas contra o NetworkX
 % =================================================================================
 \section{Determinação do Grafo}
 A regra do enunciado é
-$f(M) = ((\text{soma dos dígitos de } M) \times (\text{últimos 2 dígitos de } M + 1)) \bmod 129$,
-usando 129 quando o resultado é 0. Para $M = 224216276$:
+\[ f(M) = \bigl(S \times (U + 1)\bigr) \bmod 129, \]
+em que $S$ é a soma dos dígitos de $M$ e $U$ são os seus dois últimos dígitos; se o resultado
+for 0, usa-se 129. Para $M = 224216276$:
 \begin{itemize}
   \item soma dos dígitos: $2+2+4+2+1+6+2+7+6 = 32$;
   \item últimos dois dígitos: $76$, logo $76 + 1 = 77$;
@@ -158,6 +160,7 @@ algoritmos cúbicos, o arquivo extra aumentaria o custo sem mudar o tipo de aná
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{01_original_tempo_sinal.pdf}
+  \Description{Gráfico de linha com o número de posts por mês, crescente entre 2014 e 2017, e gráfico de barras com muito mais links positivos que negativos.}
   \caption{Posts com hiperlink por mês (esquerda) e quantidade de links positivos e negativos
   (direita) no arquivo original.}
   \label{fig:original}
@@ -166,6 +169,7 @@ algoritmos cúbicos, o arquivo extra aumentaria o custo sem mudar o tipo de aná
 % =================================================================================
 \section{Tratamento dos Dados}
 A Tabela~\ref{tab:tratamento} resume os tratamentos e o efeito de cada um. Os principais foram:
+\input{tabelas/tratamento.tex}
 \begin{enumerate}
   \item \textbf{Temporal $\rightarrow$ estático:} união de todos os posts do período. A análise
     temporal fica fora do escopo; todas as perguntas do enunciado se referem à estrutura agregada.
@@ -188,7 +192,6 @@ A Tabela~\ref{tab:tratamento} resume os tratamentos e o efeito de cada um. Os pr
 O arquivo não tem auto-laços; a verificação está registrada na tabela. Descartamos o vetor de atributos
 de texto, que não é usado nas análises e ocupa a maior parte dos 319~MB do arquivo.
 
-\input{tabelas/tratamento.tex}
 
 % =================================================================================
 \section{Metodologia}
@@ -249,7 +252,7 @@ social real, em que cada comunidade interage com uma fração ínfima das demais
 \textbf{Componentes.} O grafo é quase conexo. A maior componente concentra \fracLCC{} dos vértices;
 as outras \nComponentes{} componentes são minúsculas: a segunda maior tem \segundaComp{} vértices, e
 há \compPares{} pares e \compTrios{} trios isolados. São, em geral, comunidades pequenas que só
-interagiram entre si, como mostra a tabela de tamanhos em \texttt{resultados/03\_tamanho\_componentes}.
+interagiram entre si (a tabela completa de tamanhos está na pasta \texttt{resultados/} do repositório).
 
 \textbf{Graus.} O grau médio é \grauMedio, mas esse número esconde uma distribuição muito desigual:
 a mediana é \grauMediana{} (\fracGrauUm{} dos subreddits têm um único vizinho), enquanto o grau máximo
@@ -283,6 +286,7 @@ todo o núcleo, e não concentradas num canto.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{03_distribuicao_graus.pdf}
+  \Description{Histograma e CCDF dos graus em escala log-log, ambos decrescendo de forma aproximadamente linear ao longo de três ordens de grandeza.}
   \caption{Distribuição de graus: histograma com bins logarítmicos (esquerda) e CCDF (direita),
   ambos em escala log-log.}
   \label{fig:graus}
@@ -291,6 +295,7 @@ todo o núcleo, e não concentradas num canto.
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.9\linewidth]{03b_visualizacao.pdf}
+  \Description{Desenho de rede com 150 vértices densamente interligados, os maiores no centro, e algumas arestas laranja espalhadas.}
   \caption{Subgrafo dos 150 subreddits de maior grau. O tamanho do vértice é proporcional ao grau no
   subgrafo; arestas laranja têm sinal negativo.}
   \label{fig:visual}
@@ -300,6 +305,8 @@ todo o núcleo, e não concentradas num canto.
 A Tabela~\ref{tab:algoritmos} resume a saída de cada algoritmo no G13, e a Tabela~\ref{tab:tempos},
 o tempo de cada um. A seguir comentamos cada algoritmo, com o resultado, a complexidade teórica e o
 tempo observado.
+\input{tabelas/algoritmos.tex}
+\input{tabelas/tempos.tex}
 
 \textbf{BFS e DFS} ($O(n+m)$). As duas buscas, a partir de \texttt{askreddit}, alcançam os \nLCC{}
 vértices da maior componente, como esperado. A BFS também dá a excentricidade da origem, \raio{}, igual
@@ -351,8 +358,6 @@ relações mais fortes da rede. O Kruskal, com union-find, é mais rápido (\tKr
 heap (\tPrim~ms), porque ordena as arestas uma única vez, enquanto o Prim faz uma operação de heap por
 aresta examinada.
 
-\input{tabelas/algoritmos.tex}
-\input{tabelas/tempos.tex}
 
 \textbf{Complexidade observada.} A Figura~\ref{fig:escala} mostra o tempo médio de cada algoritmo em
 subgrafos de tamanho crescente, com o intervalo de confiança de cada ponto e a curva teórica ajustada;
@@ -379,6 +384,7 @@ também depende das constantes da linguagem e de como os dados de teste variam c
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{04_complexidade_observada.pdf}
+  \Description{Painéis com o tempo médio de cada algoritmo em função do número de vértices, com barras de erro e a curva teórica ajustada.}
   \caption{Tempo médio (com IC de 95\%, t-Student, 10 repetições) em subgrafos de tamanho crescente e
   curva teórica $c \cdot f(n,m)$ ajustada por mínimos quadrados.}
   \label{fig:escala}
@@ -386,6 +392,7 @@ também depende das constantes da linguagem e de como os dados de teste variam c
 
 \input{tabelas/ajuste.tex}
 
+\FloatBarrier
 \subsection{Parte III: propriedades da rede}
 
 \textbf{(1) Mundo pequeno.} Pelo critério do enunciado, $L(G) \approx L_{\text{aleatório}}$ e
@@ -419,6 +426,7 @@ pequena alcança rapidamente as grandes.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{05_small_world.pdf}
+  \Description{Barras comparando a clusterização e o caminho médio do G13 com os de dois modelos aleatórios.}
   \caption{Clusterização média (escala log) e caminho médio do G13, do $G(n,m)$ e do nulo com os
   mesmos graus.}
   \label{fig:sw}
@@ -448,6 +456,7 @@ comunidades um subreddit consegue citar ou receber.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{06_lei_potencia.pdf}
+  \Description{Distribuição de graus em escala log-log com retas ajustadas e uma curva de Poisson; à direita, a CCDF com a reta de máxima verossimilhança.}
   \caption{Distribuição de graus em escala log-log com as retas ajustadas e a Poisson de um grafo
   aleatório (esquerda); CCDF com o ajuste por máxima verossimilhança (direita).}
   \label{fig:potencia}
@@ -482,6 +491,7 @@ receber links, a rede se fragmentaria em milhares de grupos desconexos.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{07_robustez.pdf}
+  \Description{Quatro painéis com boxplots da remoção aleatória e linhas horizontais para o valor original e para os três ataques direcionados.}
   \caption{Métricas A a D: boxplot da remoção aleatória (30 repetições), média $\pm$ desvio padrão, valor
   original (pontilhado) e resultado dos três ataques direcionados.}
   \label{fig:robustez}
@@ -532,6 +542,7 @@ o corte observado na Parte~III~(2).
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{09_modelos_ccdf.pdf}
+  \Description{CCDF dos graus do G13 e dos modelos Erdős–Rényi, Barabási–Albert e Watts–Strogatz em escala log-log.}
   \caption{CCDF dos graus do G13 e dos três modelos clássicos, em escala log-log.}
   \label{fig:modelos}
 \end{figure}

@@ -7,6 +7,7 @@ A pasta relatorio/ fica autocontida: para usar no Overleaf, envie-a junto com o 
 
 Uso:  python scripts/gerar_relatorio.py [--compilar]
 """
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,8 @@ def _celula(x, casas):
     """Textos que já trazem LaTeX matemático ($...$) passam sem escape."""
     if isinstance(x, str) and "$" in x:
         return x
+    if isinstance(x, str) and re.fullmatch(r"-?\d+(\.\d+)?(e-?\d+)?", x.strip()):
+        x = float(x) if any(c in x for c in ".e") else int(x)   # números lidos como texto (colunas mistas)
     return _celula_num(x, casas)
 
 RES, FIG, REL = RAIZ / "resultados", RAIZ / "figuras", RAIZ / "relatorio"
@@ -104,7 +107,8 @@ def main():
     tabela(t, "tratamento", "Tratamentos aplicados ao arquivo original.", larga=True, alinhamento="lll")
 
     p1 = ler("03_parte1_medidas", index_col=0)
-    tabela(p1, "parte1", "Parte I: medidas estruturais e indicação do que foi calculado.", alinhamento="llll")
+    tabela(p1, "parte1", "Parte I: medidas estruturais e indicação do que foi calculado.", larga=True,
+           alinhamento="llll")
 
     alg = ler("04_resultados_algoritmos", index_col=0)
     tabela(alg, "algoritmos", "Parte II: resultados dos algoritmos no G13.", larga=True,
