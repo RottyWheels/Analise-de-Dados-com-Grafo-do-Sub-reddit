@@ -4,12 +4,12 @@ from __future__ import annotations
 import math
 import random
 import statistics
-import time
 from collections import Counter
 
 import numpy as np
 
 from .algoritmos import bfs
+from .medicao import intervalo_confianca, medir  # reexportados por compatibilidade
 
 
 # ---------------------------------------------------------------- graus
@@ -181,30 +181,3 @@ def mle_clauset(graus: np.ndarray, kmin: int | None = None) -> dict:
     candidatos = [kmin] if kmin else [k for k in np.unique(graus) if (graus >= k).sum() >= 50][:200]
     melhor = min(((km, *ajuste(km)) for km in candidatos), key=lambda t: t[2])
     return {"kmin": int(melhor[0]), "gamma": melhor[1], "ks": melhor[2], "n_cauda": melhor[3]}
-
-
-# ---------------------------------------------------------------- tempo de execução
-def intervalo_confianca(amostras, conf: float = 0.95) -> dict:
-    """IC conforme o enunciado: n >= 30 -> Normal (z); n < 30 -> t-Student."""
-    from scipy import stats
-    n = len(amostras)
-    media = statistics.mean(amostras)
-    dp = statistics.stdev(amostras) if n > 1 else 0.0
-    if n >= 30:
-        crit, dist = stats.norm.ppf(1 - (1 - conf) / 2), "Normal (z)"
-    else:
-        crit, dist = stats.t.ppf(1 - (1 - conf) / 2, n - 1), "t-Student"
-    h = crit * dp / math.sqrt(n)
-    return {"n": n, "media_s": media, "desvio_s": dp, "ic_inf_s": media - h, "ic_sup_s": media + h,
-            "distribuicao": dist}
-
-
-def medir(func, entradas, reps: int = 30) -> dict:
-    """Executa func(*entradas[i % len(entradas)]) `reps` vezes e devolve estatísticas."""
-    tempos = []
-    for i in range(reps):
-        args = entradas[i % len(entradas)]
-        t0 = time.perf_counter()
-        func(*args)
-        tempos.append(time.perf_counter() - t0)
-    return intervalo_confianca(tempos)
