@@ -83,3 +83,13 @@ def test_ajuste_n_m():
     r = Me.ajustar_n_m(2e-6 * n + 5e-7 * m, n, m)
     assert math.isclose(r["a_por_vertice"], 2e-6) and math.isclose(r["b_por_aresta"], 5e-7)
     assert math.isclose(r["r2"], 1)
+
+
+def test_trocas_preservam_graus():
+    G = nx.barabasi_albert_graph(1500, 3, seed=4)
+    adj = A.lista_adj(G)
+    novo = M.trocas_preservando_graus(adj, 3.0, seed=1)
+    assert all(len(novo[u]) == len(adj[u]) for u in adj)
+    assert all(u not in vs and len(vs) == len(set(vs)) for u, vs in novo.items())
+    arest = lambda a: {frozenset((u, v)) for u, vs in a.items() for v in vs}
+    assert len(arest(novo) & arest(adj)) < 0.3 * G.number_of_edges()   # bem embaralhado

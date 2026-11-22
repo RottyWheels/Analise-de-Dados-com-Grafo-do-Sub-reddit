@@ -131,6 +131,53 @@ def small_world(adj: dict, reps: int = 5, fontes: int = 300, seed: int = 0) -> d
         "sigma": (C_G / C_r) / (L_G / L_r),
     }
 
+def trocas_preservando_graus(adj: dict, trocas_por_aresta: float = 3.0, seed: int = 0) -> dict:
+    """Aleatoriza o grafo mantendo o grau de cada vértice (trocas duplas de arestas,
+    Maslov & Sneppen, 2002): (a,b),(c,d) -> (a,d),(c,b), rejeitando laços e arestas repetidas."""
+    rng = random.Random(seed)
+    arestas = list({(u, v) if u < v else (v, u) for u, vs in adj.items() for v in vs})
+    existe = set(arestas)
+    m = len(arestas)
+    for _ in range(int(trocas_por_aresta * m)):
+        i, j = rng.randrange(m), rng.randrange(m)
+        if i == j:
+            continue
+        a, b = arestas[i]
+        c, d = arestas[j]
+        if rng.random() < 0.5:
+            c, d = d, c
+        if len({a, b, c, d}) < 4:
+            continue
+        e1 = (a, d) if a < d else (d, a)
+        e2 = (c, b) if c < b else (b, c)
+        if e1 in existe or e2 in existe:
+            continue
+        existe.difference_update((arestas[i], arestas[j]))
+        existe.update((e1, e2))
+        arestas[i], arestas[j] = e1, e2
+    novo = {u: [] for u in adj}
+    for u, v in arestas:
+        novo[u].append(v)
+        novo[v].append(u)
+    return novo
+
+
+def small_world_graus(adj: dict, reps: int = 3, fontes: int = 300, seed: int = 0,
+                      trocas_por_aresta: float = 3.0) -> dict:
+    """Small-world contra um nulo que preserva a sequência de graus: separa o efeito dos hubs
+    (que o G(n, m) não reproduz) do agrupamento local propriamente dito."""
+    C_G, _, _ = clusterizacao(adj)
+    L_G, _, _ = caminho_medio_amostrado(adj, fontes, seed)
+    Cs, Ls = [], []
+    for r in range(reps):
+        a = trocas_preservando_graus(adj, trocas_por_aresta, seed + r)
+        Cs.append(clusterizacao(a)[0])
+        Ls.append(caminho_medio_amostrado(maior_componente_adj(a), fontes, seed + r)[0])
+    C_c, L_c = statistics.mean(Cs), statistics.mean(Ls)
+    return {"C(G)": C_G, "C_graus": C_c, "C(G)/C_graus": C_G / C_c,
+            "L(G)": L_G, "L_graus": L_c, "L(G)/L_graus": L_G / L_c,
+            "sigma_graus": (C_G / C_c) / (L_G / L_c)}
+
 
 # ---------------------------------------------------------------- lei de potência
 def regressao_loglog(x, y) -> dict:
