@@ -83,3 +83,14 @@ def escala(casos: dict, grafos: list, reps: int = 10) -> "pd.DataFrame":
     df["r2_ajuste"] = df["algoritmo"].map(lambda a: ajustes[a]["r2"])
     df["previsto_s"] = df["c"] * df["f(n,m)"]
     return df
+
+
+def ajustar_n_m(t, n, m) -> dict:
+    """Ajuste t ≈ a·n + b·m (custos separados por vértice e por aresta), para algoritmos O(n + m)
+    medidos em grafos cuja razão m/n varia com o tamanho."""
+    t = np.asarray(t, float)
+    X = np.c_[np.asarray(n, float), np.asarray(m, float)]
+    (a, b), *_ = np.linalg.lstsq(X, t, rcond=None)
+    res = t - X @ np.array([a, b])
+    r2 = 1 - float(res @ res) / float(((t - t.mean()) ** 2).sum())
+    return {"a_por_vertice": float(a), "b_por_aresta": float(b), "r2": r2}

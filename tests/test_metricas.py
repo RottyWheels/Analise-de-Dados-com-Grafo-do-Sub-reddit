@@ -75,3 +75,11 @@ def test_modelos_geradores():
     ws = Mo.watts_strogatz(3000, 6, 0.2, seed=2)
     assert sum(map(len, ws.values())) // 2 == 3000 * 3
     assert all(u not in vs and len(vs) == len(set(vs)) for u, vs in ws.items())
+
+
+def test_ajuste_n_m():
+    n = np.array([100, 200, 400, 800.0])
+    m = np.array([1700, 3200, 4800, 6400.0])
+    r = Me.ajustar_n_m(2e-6 * n + 5e-7 * m, n, m)
+    assert math.isclose(r["a_por_vertice"], 2e-6) and math.isclose(r["b_por_aresta"], 5e-7)
+    assert math.isclose(r["r2"], 1)
