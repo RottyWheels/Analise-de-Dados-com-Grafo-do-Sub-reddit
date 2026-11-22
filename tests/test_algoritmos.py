@@ -101,3 +101,22 @@ def test_prim_floresta_em_grafo_desconexo(G_desconexo):
         G_desconexo[u][v]["weight"] = 1.0
     agm, _ = A.prim(A.lista_adj_ponderada(G_desconexo))
     assert len(agm) == len(G_desconexo) - nx.number_connected_components(G_desconexo)
+
+
+@pytest.mark.parametrize("seed", [1, 2, 3])
+def test_pontes_articulacoes_igual_networkx(seed):
+    G = nx.gnm_random_graph(300, 380, seed=seed)       # esparso: muitas pontes
+    pontes, artic = A.pontes_articulacoes(A.lista_adj(G))
+    assert {frozenset(e) for e in pontes} == {frozenset(e) for e in nx.bridges(G)}
+    assert artic == set(nx.articulation_points(G))
+
+
+def test_floyd_warshall_puro_igual_numpy(G_pond):
+    S = G_pond.subgraph(range(80)).copy()
+    nos1, D1 = A.floyd_warshall(S)
+    nos2, D2 = A.floyd_warshall_puro(S)
+    assert nos1 == nos2
+    for i in range(len(nos1)):
+        for j in range(len(nos1)):
+            a, b = D1[i, j], D2[i][j]
+            assert (math.isinf(a) and math.isinf(b)) or math.isclose(a, b)

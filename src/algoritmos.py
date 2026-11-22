@@ -268,3 +268,80 @@ def prim(adjw: dict):
                 if x not in visit:
                     heapq.heappush(heap, (wx, v, x))
     return agm, total
+
+
+# ---------------------------------------------------------------- pontes e articulações (Tarjan)
+def pontes_articulacoes(adj: dict):
+    """Pontes e vértices de articulação de um grafo não dirigido (Tarjan, 1974), versão iterativa.
+
+    Usa tempos de descoberta (disc) e o menor tempo alcançável pela subárvore (low):
+    (u, v) é ponte se low[v] > disc[u]; u é articulação se é raiz com 2+ filhos na árvore
+    de DFS, ou não raiz com algum filho v tal que low[v] >= disc[u]. O(n + m).
+    """
+    disc, low = {}, {}
+    pontes, artic = [], set()
+    t = 0
+    for raiz in adj:
+        if raiz in disc:
+            continue
+        disc[raiz] = low[raiz] = t
+        t += 1
+        filhos_raiz = 0
+        pilha = [(raiz, None, iter(adj[raiz]))]
+        while pilha:
+            u, pai, it = pilha[-1]
+            avancou = False
+            for v in it:
+                if v == pai:
+                    continue
+                if v not in disc:
+                    disc[v] = low[v] = t
+                    t += 1
+                    if u == raiz:
+                        filhos_raiz += 1
+                    pilha.append((v, u, iter(adj[v])))
+                    avancou = True
+                    break
+                low[u] = min(low[u], disc[v])
+            if avancou:
+                continue
+            pilha.pop()
+            if pai is not None:
+                low[pai] = min(low[pai], low[u])
+                if low[u] > disc[pai]:
+                    pontes.append((pai, u))
+                if pai != raiz and low[u] >= disc[pai]:
+                    artic.add(pai)
+        if filhos_raiz >= 2:
+            artic.add(raiz)
+    return pontes, artic
+
+
+def floyd_warshall_puro(G, peso: str = "weight"):
+    """Floyd-Warshall em Python puro (listas), com poda: para cada k, só percorre as linhas i
+    que alcançam k. Mesmo resultado da versão numpy; serve para comparar as duas."""
+    nos = list(G.nodes)
+    idx = {u: i for i, u in enumerate(nos)}
+    n = len(nos)
+    inf = math.inf
+    D = [[inf] * n for _ in range(n)]
+    for i in range(n):
+        D[i][i] = 0.0
+    for u, v, d in G.edges(data=True):
+        w = d.get(peso, 1.0)
+        i, j = idx[u], idx[v]
+        D[i][j] = min(D[i][j], w)
+        if not G.is_directed():
+            D[j][i] = min(D[j][i], w)
+    for k in range(n):
+        Dk = D[k]
+        for i in range(n):
+            Di = D[i]
+            dik = Di[k]
+            if dik == inf:
+                continue
+            for j in range(n):
+                nd = dik + Dk[j]
+                if nd < Di[j]:
+                    Di[j] = nd
+    return nos, D
