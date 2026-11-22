@@ -94,11 +94,15 @@ def casos_tempo(G_lcc, G_dir, adj, adj_lcc, succ, pred, subs_fw, fontes):
         ("Bellman-Ford", "O(n · m)", "maior componente",
          lambda s: A.bellman_ford(nosL, eL, s, dirigido=False), [(s,) for s in fontes]),
         ("Tarjan (SCC)", "O(n + m)", "G_dir", lambda: A.tarjan_scc(succ), [()]),
+        ("Tarjan (pontes e articulações)", "O(n + m)", "maior componente", lambda: A.pontes_articulacoes(adj_lcc), [()]),
         ("Kruskal", "O(m log m)", "maior componente", lambda: A.kruskal(nosL, eL), [()]),
         ("Prim", "O(m log n)", "maior componente", lambda: A.prim(awL), [()]),
     ]
     casos += [(f"Floyd-Warshall (n={n})", "O(n³)", f"subgrafo n={n}", (lambda S: lambda: A.floyd_warshall(S))(S_), [()])
               for n, S_ in subs_fw.items()]
+    casos += [(f"Floyd-Warshall puro (n={n})", "O(n³)", f"subgrafo n={n}",
+               (lambda S: lambda: A.floyd_warshall_puro(S))(S_), [()])
+              for n, S_ in subs_fw.items() if n <= 500]
     return casos
 
 
@@ -125,6 +129,7 @@ def casos_escala(G_dir):
         "Euler (não dirigido)": (prep_adj, lambda e, i: A.euleriano_nao_dirigido(e[0]), lambda n, m: n + m),
         "Euler (dirigido)": (prep_dir, lambda e, i: A.euleriano_dirigido(*e), lambda n, m: n + m),
         "Tarjan (SCC)": (prep_dir, lambda e, i: A.tarjan_scc(e[0]), lambda n, m: n + m),
+        "Tarjan (pontes e articulações)": (prep_adj, lambda e, i: A.pontes_articulacoes(e[0]), lambda n, m: n + m),
         "Dijkstra": (prep_w, lambda e, i: A.dijkstra(e[0], e[3][i % len(e[3])]), lambda n, m: (n + m) * lg(n)),
         "Bellman-Ford": (prep_w, lambda e, i: A.bellman_ford(e[2], e[1], e[3][i % len(e[3])], dirigido=False),
                          lambda n, m: n * m),

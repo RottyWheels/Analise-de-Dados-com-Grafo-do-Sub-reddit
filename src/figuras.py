@@ -78,11 +78,17 @@ def escala(df):
     return salvar_figura(fig, "04_complexidade_observada")
 
 
-def small_world(sw):
-    fig, ax = plt.subplots(1, 2, figsize=(9, 3.2))
-    ax[0].bar(["G13", "aleatório"], [sw["C(G)"], sw["C_aleatorio"]], color=[AZUL, CINZA])
+def small_world(sw, swg=None):
+    """Barras de C e L: G13 × G(n, m) e, se dado, × nulo que preserva os graus."""
+    rot, cores = ["G13", "G(n,m)"], [AZUL, CINZA]
+    C, L = [sw["C(G)"], sw["C_aleatorio"]], [sw["L(G)"], sw["L_aleatorio"]]
+    if swg:
+        rot.append("mesmos graus"); cores.append(VERDE)
+        C.append(swg["C_graus"]); L.append(swg["L_graus"])
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3.4))
+    ax[0].bar(rot, C, color=cores)
     ax[0].set(title="Clusterização média C (escala log)", yscale="log")
-    ax[1].bar(["G13", "aleatório"], [sw["L(G)"], sw["L_aleatorio"]], color=[AZUL, CINZA])
+    ax[1].bar(rot, L, color=cores)
     ax[1].set(title="Comprimento médio dos caminhos L")
     return salvar_figura(fig, "05_small_world")
 
@@ -116,7 +122,7 @@ def lei_potencia(adj, pl, grau_medio):
 def robustez(orig, aleat, ataques: dict):
     nomes = {"A_S": "A – maior componente (S)", "B_c": "B – nº de componentes (c)",
              "C_L": "C – caminho médio (L)", "D_isolados": "D – fração de isolados"}
-    estilos = [(LARANJA, "--"), (ROXO, "-.")]
+    estilos = [(LARANJA, "--"), (ROXO, "-."), (VERDE, (0, (1, 1)))]
     fig, axs = plt.subplots(1, 4, figsize=(15, 3.6))
     for ax, (k, t) in zip(axs, nomes.items()):
         ax.boxplot(aleat[k], widths=0.5)
