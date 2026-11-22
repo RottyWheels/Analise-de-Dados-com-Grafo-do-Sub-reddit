@@ -82,3 +82,22 @@ def salvar_figura(fig, nome: str, pasta: Path = FIG):
     fig.savefig(pasta / f"{nome}.png", dpi=200, bbox_inches="tight")
     fig.savefig(pasta / f"{nome}.pdf", bbox_inches="tight")
     return fig
+
+
+def _macro_valor(v, casas: int = 3) -> str:
+    v = _fmt_num(v, casas)
+    return v if isinstance(v, str) else str(v)
+
+
+def escrever_macros(valores: dict, caminho: Path = RES / "valores.tex", casas: int = 3) -> Path:
+    """Grava \\newcommand{\\nome}{valor} para cada item, com números no formato brasileiro.
+    Nomes de macro LaTeX só aceitam letras: use chaves como 'diametro', 'gammaMLE'."""
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    linhas = ["% Gerado por src/relatorio.py (escrever_macros). Não editar à mão."]
+    for nome, v in valores.items():
+        if not nome.isalpha():
+            raise ValueError(f"nome de macro inválido: {nome}")
+        val = v if isinstance(v, str) else _macro_valor(v, casas)
+        linhas.append(f"\\newcommand{{\\{nome}}}{{{val}}}")
+    caminho.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    return caminho

@@ -144,6 +144,25 @@ def tabela_hubs(G_dir, btw: dict, pr: dict) -> pd.DataFrame:
                          "PageRank": top10(pr), "betweenness (Brandes)": top10(btw)}, index=range(1, 11))
 
 
+def perfil_hubs(df, G_dir, G_und, pr: dict, btw: dict, k: int = 10) -> pd.DataFrame:
+    """Perfil dos k subreddits de maior grau (não dirigido): entrada/saída, PageRank,
+    betweenness, reciprocidade e fração de links negativos enviados e recebidos."""
+    neg_env = df[df.sign == -1].src.value_counts()
+    neg_rec = df[df.sign == -1].dst.value_counts()
+    tot_env, tot_rec = df.src.value_counts(), df.dst.value_counts()
+    linhas = []
+    for u, g in sorted(G_und.degree, key=lambda x: -x[1])[:k]:
+        succ, pred = set(G_dir.successors(u)), set(G_dir.predecessors(u))
+        linhas.append({
+            "subreddit": u, "grau": g, "entrada": len(pred), "saída": len(succ),
+            "PageRank": pr.get(u, 0.0), "betweenness": btw.get(u, 0.0),
+            "recíproco": len(succ & pred) / len(succ | pred) if succ | pred else 0.0,
+            "neg. enviados": neg_env.get(u, 0) / tot_env.get(u, 1) if u in tot_env else 0.0,
+            "neg. recebidos": neg_rec.get(u, 0) / tot_rec.get(u, 1) if u in tot_rec else 0.0,
+        })
+    return pd.DataFrame(linhas).set_index("subreddit")
+
+
 def tabela_negativos(df) -> pd.DataFrame:
     neg = df[df.sign == -1]
     return pd.DataFrame({
