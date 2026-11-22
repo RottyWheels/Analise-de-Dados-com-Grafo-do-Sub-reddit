@@ -17,7 +17,7 @@ import pandas as pd
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
 
-from src.relatorio import _celula as _celula_num, _escapar  # noqa: E402
+from src.relatorio import _celula as _celula_num, _escapar, escrever_macros  # noqa: E402
 
 
 def _celula(x, casas):
@@ -51,12 +51,54 @@ def ler(nome, **kw):
     return pd.read_csv(RES / f"{nome}.csv", **kw)
 
 
+def macros_extras():
+    """Números adicionais citados no texto, derivados de resultados/ e data/processed/."""
+    tm = ler("04_tempos_execucao", index_col=0)["media_s"]
+    aj = ler("04_ajuste_complexidade", index_col=0)["r2_ajuste"]
+    nm = ler("04_ajuste_n_m", index_col=0)["r2"]
+    comp = ler("03_tamanho_componentes", index_col=0).iloc[:, 0]
+    orig = ler("01_dados_originais", index_col=0)["valor"]
+    mod = ler("09_modelos_classicos", index_col=0)
+    lineares = ["BFS", "DFS", "Euler (não dirigido)", "Euler (dirigido)", "Tarjan (SCC)",
+                "Tarjan (pontes e articulações)"]
+    e = pd.read_csv(RAIZ / "data/processed/arestas_nao_dirigidas.csv")
+    grau = pd.concat([e.src, e.dst]).value_counts()
+    top = set(grau.index[: max(1, len(grau) // 100)])
+    frac_top = (e.src.isin(top) | e.dst.isin(top)).mean()
+    ms = lambda k: tm[k] * 1e3
+    pct = lambda x: f"{100 * x:.1f}%".replace(".", ",")
+    ba = [i for i in mod.index if i.startswith("Barab")][0]
+    ws = [i for i in mod.index if i.startswith("Watts")][0]
+    er = [i for i in mod.index if i.startswith("Erd")][0]
+    return {
+        "tDFS": ms("DFS"), "tEulerU": ms("Euler (não dirigido)"), "tEulerD": ms("Euler (dirigido)"),
+        "tTarjan": ms("Tarjan (SCC)"), "tPontes": ms("Tarjan (pontes e articulações)"),
+        "tKruskal": ms("Kruskal"), "tPrim": ms("Prim"),
+        "tFWcem": ms("Floyd-Warshall (n=100)"), "tFWpuroCem": ms("Floyd-Warshall puro (n=100)"),
+        "razaoFWpuro": tm["Floyd-Warshall puro (n=500)"] / tm["Floyd-Warshall (n=500)"],
+        "razaoFWmil": tm["Floyd-Warshall (n=1000)"] / tm["Floyd-Warshall (n=500)"],
+        "rLinMin": aj[lineares].min(), "rLinMax": aj[lineares].max(),
+        "rNMmin": nm[lineares].min(), "rNMmax": nm[lineares].max(),
+        "rDijkstra": aj["Dijkstra"], "rKruskal": aj["Kruskal"], "rPrim": aj["Prim"],
+        "rFW": aj["Floyd-Warshall"], "rFWpuro": aj["Floyd-Warshall puro"],
+        "rBF": aj["Bellman-Ford"], "rBFkm": aj["Bellman-Ford (c·k·m)"], "rBFnm": nm["Bellman-Ford"],
+        "segundaComp": int(comp.index[1]), "compPares": int(comp.get(2, 0)), "compTrios": int(comp.get(3, 0)),
+        "postsPorPar": float(orig["posts por par (média)"]), "postsPorParMax": int(float(orig["posts por par (máximo)"])),
+        "grauMediana": float(grau.median()), "fracGrauUm": pct((grau == 1).mean()),
+        "fracArestasTop": pct(frac_top),
+        "Cba": mod.loc[ba, "C médio"], "Lba": mod.loc[ba, "L"], "gmaxBA": int(mod.loc[ba, "grau máx"]),
+        "Cws": mod.loc[ws, "C médio"], "Lws": mod.loc[ws, "L"], "Ler": mod.loc[er, "L"],
+        "gmaxER": int(mod.loc[er, "grau máx"]), "gammaBA": mod.loc[ba, "γ (MLE)"],
+    }
+
+
 def main():
     (REL / "tabelas").mkdir(parents=True, exist_ok=True)
     (REL / "figuras").mkdir(parents=True, exist_ok=True)
     for f in FIG.glob("*.pdf"):
         shutil.copy2(f, REL / "figuras" / f.name)
     shutil.copy2(RES / "valores.tex", REL / "valores.tex")
+    escrever_macros(macros_extras(), REL / "valores_extra.tex")
 
     t = ler("02_tratamentos", index_col=0)
     tabela(t, "tratamento", "Tratamentos aplicados ao arquivo original.", larga=True, alinhamento="lll")
