@@ -75,6 +75,7 @@ def escala(casos: dict, grafos: list, reps: int = 10) -> "pd.DataFrame":
         for nome, (preparar, executar, f) in casos.items():
             est = preparar(G)
             ic = medir(lambda i: executar(est, i), [(i,) for i in range(reps)], reps=reps)
+            ic = {("reps" if k == "n" else k): v for k, v in ic.items()}   # não sobrescrever o n do grafo
             linhas.append({"algoritmo": nome, "n": n, "m": m, "f(n,m)": f(n, m), **ic})
     df = pd.DataFrame(linhas)
     ajustes = {nome: ajustar(d["media_s"], d["f(n,m)"]) for nome, d in df.groupby("algoritmo")}
