@@ -1,7 +1,10 @@
-pandas>=2.0
-numpy>=1.24
-networkx>=3.0
-igraph>=0.11
-scipy>=1.10
-matplotlib>=3.7
-jupyter
+# Faixas testadas: o notebook foi executado com as versões indicadas nos comentários.
+pandas>=2.2,<4        # 3.0.5
+numpy>=1.26,<3        # 2.5.3
+networkx>=3.2,<4      # 3.7  (validação dos algoritmos e modelos BA/WS)
+igraph>=0.11,<2       # 1.0.0 (apenas conferência das distâncias e do betweenness)
+scipy>=1.11,<2        # 1.18.1
+matplotlib>=3.8,<4    # 3.11.2
+jinja2>=3.1,<4        # 3.1.6 (tabelas LaTeX via pandas Styler)
+jupyter>=1.0,<2
+pytest>=8,<10         # 9.1.1
