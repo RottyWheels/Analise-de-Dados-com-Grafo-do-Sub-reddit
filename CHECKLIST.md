@@ -6,7 +6,7 @@
 **Entrega:** `224216276.pdf` no Moodle (template WebMedia/Overleaf) + link deste repositório
 
 > Status em 22/11/2026: código, testes, notebook, dados e relatório (relatorio/224216276.pdf) prontos.
-> Falta: preencher autor/e-mail no main.tex, revisar o texto, compilar no Overleaf, testar o README e enviar no Moodle.
+> Falta: revisar o texto, compilar no Overleaf, testar o README e enviar no Moodle.
 >
 > Itens marcados com **[R]** devem aparecer obrigatoriamente no relatório.
 
@@ -118,7 +118,8 @@ Implementação própria em `src/algoritmos.py`, validada contra networkx.
 - [x] Discussão crítica
 - [x] Conclusão
 - [x] PDF nomeado `224216276.pdf` (relatorio/224216276.pdf)
-- [ ] Preencher autor e e-mail em `relatorio/main.tex` e revisar o texto
+- [x] Preencher autor e e-mail em `relatorio/main.tex`
+- [ ] Revisar o texto do relatório (interpretações com as próprias palavras)
 - [ ] Compilar no Overleaf com o template WebMedia e enviar no Moodle
 
 ## 8. Revisão final
