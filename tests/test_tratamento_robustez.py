@@ -1,0 +1,44 @@
+import math
+
+import pandas as pd
+
+from src import robustez as R, tratamento as T, algoritmos as A
+from src.relatorio import tabela_latex, _fmt_num
+
+
+def _df():
+    return pd.DataFrame({
+        "src": ["a", "a", "b", "c", "a", "d"],
+        "dst": ["b", "b", "a", "c", "c", "a"],
+        "ts": pd.to_datetime(["2014-01-01"] * 6),
+        "sign": [1, -1, -1, 1, -1, 1],
+    })
+
+
+def test_arestas_dirigidas_agrega_e_remove_loops():
+    e = T.arestas_dirigidas(_df()).set_index(["src", "dst"])
+    assert ("c", "c") not in e.index
+    assert e.loc[("a", "b"), "count"] == 2 and e.loc[("a", "b"), "sign"] == 1   # soma 0 -> +1
+    assert e.loc[("a", "c"), "sign"] == -1
+
+
+def test_arestas_nao_dirigidas_junta_sentidos():
+    e = T.arestas_nao_dirigidas(T.arestas_dirigidas(_df())).set_index(["src", "dst"])
+    assert e.loc[("a", "b"), "count"] == 3          # a→b (2) + b→a (1)
+    assert e.loc[("a", "b"), "sign"] == 1           # saldo ponderado: (+1)·2 + (−1)·1 = 1 > 0
+    assert math.isclose(e.loc[("a", "b"), "w"], 1 / 3)
+
+
+def test_robustez_r_e_metricas():
+    assert R.r_remover(34671) == 1734
+    adj = {0: [1, 2, 3], 1: [0], 2: [0], 3: [0]}       # estrela
+    m = R.metricas(R.remover(adj, {0}), n_original=4, fontes=10)
+    assert m["B_c"] == 3 and math.isclose(m["D_isolados"], 1.0) and math.isclose(m["A_S"], 0.25)
+
+
+def test_formatacao_brasileira():
+    assert _fmt_num(35776) == "35.776"
+    assert _fmt_num(0.1862) == "0,1862"
+    assert _fmt_num(2464.5) == "2.464,5"
+    tex = tabela_latex(pd.DataFrame({"x": [1.5]}, index=["a"]), "Legenda", "tab:x")
+    assert "\\caption{Legenda}" in tex and "\\label{tab:x}" in tex and "1,5" in tex
