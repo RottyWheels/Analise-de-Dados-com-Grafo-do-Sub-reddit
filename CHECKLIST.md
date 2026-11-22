@@ -5,7 +5,8 @@
 **Dataset:** https://snap.stanford.edu/data/soc-RedditHyperlinks.html — arquivo usado: `soc-redditHyperlinks-body.tsv`
 **Entrega:** `224216276.pdf` no Moodle (template WebMedia/Overleaf) + link deste repositório
 
-> Status em 22/11/2026: código, testes, notebook, dados tratados, figuras (PNG/PDF) e tabelas LaTeX prontos. Itens sem marcação são de escrita do relatório (interpretações e PDF).
+> Status em 22/11/2026: código, testes, notebook, dados e relatório (relatorio/224216276.pdf) prontos.
+> Falta: preencher autor/e-mail no main.tex, revisar o texto, compilar no Overleaf, testar o README e enviar no Moodle.
 >
 > Itens marcados com **[R]** devem aparecer obrigatoriamente no relatório.
 
@@ -14,7 +15,7 @@
 ## 0. Determinação do grafo **[R]**
 - [x] Célula no notebook com o cálculo: f(M) = ((soma dos dígitos de M) × (últimos 2 dígitos de M + 1)) mod 129
   - soma = 2+2+4+2+1+6+2+7+6 = 32; últimos 2 dígitos = 76 → 32 × 77 = 2464; 2464 mod 129 = **13**
-- [ ] Nota no relatório: o mesmo dataset aparece como G13, G72, G92 e G109 na planilha; usada a entrada G13
+- [x] Nota no relatório: o mesmo dataset aparece como G13, G72, G92 e G109 na planilha; usada a entrada G13
 
 ## 1. Estrutura do repositório (30% da nota)
 - [x] `README.md` — descrição, como instalar e como executar
@@ -82,7 +83,7 @@ Implementação própria em `src/algoritmos.py`, validada contra networkx.
 - [x] Calcular L(G) e C(G) em `G_lcc`
 - [x] Calcular L e C de grafo aleatório equivalente (mesmo n e grau médio)
 - [x] Testar: **L(G) ≈ L_aleatório** e **C(G) ≫ C_aleatório**
-- [ ] Responder: faz sentido para o grafo? Implicação prática?
+- [x] Responder: faz sentido para o grafo? Implicação prática?
 
 ### 6.2 Lei de potência (Apêndice B)
 - [x] Distribuição de graus → histograma e/ou CCDF
@@ -98,28 +99,30 @@ Implementação própria em `src/algoritmos.py`, validada contra networkx.
 - [x] Remoção aleatória: 30–50 repetições + boxplots (média ± desvio)
 - [x] Ataque direcionado: centralidade escolhida (grau e/ou betweenness), ranking fixo, remover top r
 - [x] Comparar S_rand vs S_cent e c_rand vs c_cent
-- [ ] Interpretar: vulnerável se S_rand ≫ S_cent e c_cent ≫ c_rand
+- [x] Interpretar: vulnerável se S_rand ≫ S_cent e c_cent ≫ c_rand
 
 ### 6.4 Descoberta mais interessante
-- [ ] Escolher e argumentar (ex.: hubs, concentração de links negativos, SCC vs WCC, reciprocidade)
+- [x] Escolher e argumentar (ex.: hubs, concentração de links negativos, SCC vs WCC, reciprocidade)
 
 ### 6.5 (EXTRA) Modelo clássico
 - [x] Comparar com Erdős–Rényi, Barabási–Albert e Watts–Strogatz (mesmo n e m)
 
 ## 7. Relatório (70% da nota) — template WebMedia
-- [ ] Cálculo de determinação do grafo
-- [ ] Link para o GitHub
-- [ ] Descrição do grafo original
-- [ ] Tratamento realizado
-- [ ] Metodologia
-- [ ] Resultados: tabelas e gráficos, cada um comentado
-- [ ] Respostas às perguntas obrigatórias (Parte III, itens 1–4)
-- [ ] Discussão crítica
-- [ ] Conclusão
-- [ ] PDF nomeado `224216276.pdf` e enviado no Moodle
+- [x] Cálculo de determinação do grafo
+- [x] Link para o GitHub
+- [x] Descrição do grafo original
+- [x] Tratamento realizado
+- [x] Metodologia
+- [x] Resultados: tabelas e gráficos, cada um comentado
+- [x] Respostas às perguntas obrigatórias (Parte III, itens 1–4)
+- [x] Discussão crítica
+- [x] Conclusão
+- [x] PDF nomeado `224216276.pdf` (relatorio/224216276.pdf)
+- [ ] Preencher autor e e-mail em `relatorio/main.tex` e revisar o texto
+- [ ] Compilar no Overleaf com o template WebMedia e enviar no Moodle
 
 ## 8. Revisão final
 - [x] Notebook roda do zero (Kernel → Restart & Run All)
 - [ ] README testado seguindo os passos
 - [x] Todas as figuras do relatório estão em `figuras/`
-- [ ] Todos os itens **[R]** presentes no PDF
+- [x] Todos os itens **[R]** presentes no PDF
