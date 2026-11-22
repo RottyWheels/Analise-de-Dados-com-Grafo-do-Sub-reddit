@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Ajuste do tempo a $a \cdot n + b \cdot m$ (custos por vértice e por aresta) e $R^2$.}
+\label{tab:04_ajuste_n_m}
+\begin{tabular}{lrrr}
+\toprule
+ & a\_por\_vertice & b\_por\_aresta & r2 \\
+\midrule
+BFS & $9,348 \times 10^{-7}$ & $3,824 \times 10^{-8}$ & 0,9971 \\
+DFS & $1,051 \times 10^{-6}$ & $-1,164 \times 10^{-9}$ & 0,9964 \\
+Euler (não dirigido) & $1,371 \times 10^{-6}$ & $6,095 \times 10^{-9}$ & 0,9968 \\
+Euler (dirigido) & $3,020 \times 10^{-6}$ & $1,384 \times 10^{-7}$ & 0,9967 \\
+Tarjan (SCC) & $1,921 \times 10^{-6}$ & $1,788 \times 10^{-8}$ & 0,9989 \\
+Dijkstra & $3,446 \times 10^{-6}$ & $1,601 \times 10^{-7}$ & 0,9993 \\
+Bellman-Ford & $7,407 \times 10^{-6}$ & $9,212 \times 10^{-7}$ & 0,9993 \\
+Kruskal & $1,208 \times 10^{-6}$ & $4,781 \times 10^{-7}$ & 0,9903 \\
+Prim & $3,619 \times 10^{-6}$ & $1,112 \times 10^{-6}$ & 0,9985 \\
+\bottomrule
+\end{tabular}
+\end{table}

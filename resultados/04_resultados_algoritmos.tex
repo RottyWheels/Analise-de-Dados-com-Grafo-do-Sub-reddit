@@ -1,17 +1,22 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Resultados dos algoritmos da Parte II no G13.}
+\label{tab:04_resultados_algoritmos}
 \begin{tabular}{ll}
 \toprule
- & Resultado \\
-Algoritmo &  \\
+Algoritmo & Resultado \\
 \midrule
-BFS & origem = askreddit; alcança 34671 vértices; excentricidade = 6 \\
-DFS & origem = askreddit; visita 34671 vértices \\
-Euler (não dirigido) & 25306 vértices de grau ímpar; conexo=False → euleriano=False, semi=False \\
-Euler (dirigido) & 32257 vértices com entrada≠saída; fracamente conexo=False → euleriano=False \\
-Dijkstra & w = 1/count; distância máxima a partir de askreddit = 4.590 \\
-Bellman-Ford & mesmas distâncias que Dijkstra: True; convergiu em 6 iterações; ciclo negativo = False \\
-Floyd-Warshall & executado só em subgrafos (n ≤ 2000): O(n³) e matriz n×n de 34.671² ≈ 1,2·10⁹ células (~9,6 GB) inviáveis \\
-Tarjan (SCC) & 24071 componentes fortemente conexas; maior = 11564 vértices (32.3%); 23949 SCCs unitárias; 497 componentes fracamente conexas \\
-Kruskal & 34670 arestas; peso total = 25435.5313 \\
-Prim & 34670 arestas; peso total = 25435.5313 (igual ao Kruskal: True) \\
+BFS & origem = askreddit; alcança 34.671 vértices; excentricidade = 6 \\
+DFS & origem = askreddit; visita 34.671 vértices \\
+Euler (não dirigido) & 25.306 vértices de grau ímpar; conexo: não; euleriano: não; semieuleriano: não \\
+Euler (dirigido) & 32.257 vértices com entrada ≠ saída; fracamente conexo: não; euleriano: não \\
+Dijkstra & w = 1/count; maior distância a partir de askreddit = 4,59 \\
+Bellman-Ford & mesmas distâncias que Dijkstra: sim; rodadas até convergir: 6 (10 origens: 8–10); ciclo negativo: não \\
+Floyd-Warshall & só em subgrafos (n ≤ 2000): O(n³) e matriz 34.671² ≈ 1,2·10⁹ células (\textasciitilde{}9,6 GB) inviáveis \\
+Tarjan (SCC) & 24.071 componentes fortemente conexas; maior = 11.564 vértices (32,3\%); 23.949 unitárias; 497 fracamente conexas \\
+Kruskal & 34.670 arestas; peso total = 25.435,531 \\
+Prim & 34.670 arestas; peso total = 25.435,531 (igual ao Kruskal: sim) \\
 \bottomrule
 \end{tabular}
+\end{table}

@@ -1,20 +1,25 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Tempo de execução (s): média, desvio padrão e IC de 95\% (30 repetições, Normal).}
+\label{tab:04_tempos_execucao}
 \begin{tabular}{lllrrrrrl}
 \toprule
- & Complexidade & Grafo & n & media_s & desvio_s & ic_inf_s & ic_sup_s & distribuicao \\
-Algoritmo &  &  &  &  &  &  &  &  \\
+Algoritmo & Complexidade & Grafo & n & media\_s & desvio\_s & ic\_inf\_s & ic\_sup\_s & distribuicao \\
 \midrule
-BFS & O(n + m) & maior componente & 30 & 0.02851 & 0.002034 & 0.02778 & 0.02923 & Normal (z) \\
-DFS & O(n + m) & maior componente & 30 & 0.03286 & 0.04485 & 0.01681 & 0.04891 & Normal (z) \\
-Euler (não dirigido) & O(n + m) & G_und & 30 & 0.04052 & 0.003596 & 0.03923 & 0.04181 & Normal (z) \\
-Euler (dirigido) & O(n + m) & G_dir & 30 & 0.1519 & 0.09204 & 0.119 & 0.1848 & Normal (z) \\
-Dijkstra & O((n + m) log n) & maior componente & 30 & 0.1241 & 0.004819 & 0.1224 & 0.1258 & Normal (z) \\
-Bellman-Ford & O(n · m) & maior componente & 30 & 0.3944 & 0.05073 & 0.3763 & 0.4126 & Normal (z) \\
-Tarjan (SCC) & O(n + m) & G_dir & 30 & 0.07441 & 0.04832 & 0.05712 & 0.0917 & Normal (z) \\
-Kruskal & O(m log m) & maior componente & 30 & 0.09621 & 0.003934 & 0.0948 & 0.09761 & Normal (z) \\
-Prim & O(m log n) & maior componente & 30 & 0.2396 & 0.01754 & 0.2333 & 0.2459 & Normal (z) \\
-Floyd-Warshall (n=100) & O(n³) & subgrafo n=100 & 30 & 0.002015 & 0.0001439 & 0.001964 & 0.002067 & Normal (z) \\
-Floyd-Warshall (n=250) & O(n³) & subgrafo n=250 & 30 & 0.01707 & 0.001326 & 0.0166 & 0.01755 & Normal (z) \\
-Floyd-Warshall (n=500) & O(n³) & subgrafo n=500 & 30 & 0.217 & 0.01241 & 0.2125 & 0.2214 & Normal (z) \\
-Floyd-Warshall (n=1000) & O(n³) & subgrafo n=1000 & 30 & 1.841 & 0.1139 & 1.8 & 1.881 & Normal (z) \\
+BFS & O(n + m) & maior componente & 30 & 0,03275 & 0,001752 & 0,03212 & 0,03338 & Normal (z) \\
+DFS & O(n + m) & maior componente & 30 & 0,03072 & 0,001639 & 0,03013 & 0,03131 & Normal (z) \\
+Euler (não dirigido) & O(n + m) & G\_und & 30 & 0,05169 & 0,007413 & 0,04904 & 0,05434 & Normal (z) \\
+Euler (dirigido) & O(n + m) & G\_dir & 30 & 0,1155 & 0,01013 & 0,1118 & 0,1191 & Normal (z) \\
+Dijkstra & O((n + m) log n) & maior componente & 30 & 0,1415 & 0,02366 & 0,133 & 0,1499 & Normal (z) \\
+Bellman-Ford & O(n · m) & maior componente & 30 & 0,4149 & 0,06263 & 0,3925 & 0,4373 & Normal (z) \\
+Tarjan (SCC) & O(n + m) & G\_dir & 30 & 0,06505 & 0,00362 & 0,06376 & 0,06635 & Normal (z) \\
+Kruskal & O(m log m) & maior componente & 30 & 0,09879 & 0,01837 & 0,09222 & 0,1054 & Normal (z) \\
+Prim & O(m log n) & maior componente & 30 & 0,2734 & 0,03649 & 0,2604 & 0,2865 & Normal (z) \\
+Floyd-Warshall (n=100) & O(n³) & subgrafo n=100 & 30 & 0,002346 & $2,509 \times 10^{-4}$ & 0,002256 & 0,002435 & Normal (z) \\
+Floyd-Warshall (n=250) & O(n³) & subgrafo n=250 & 30 & 0,0219 & 0,002978 & 0,02083 & 0,02296 & Normal (z) \\
+Floyd-Warshall (n=500) & O(n³) & subgrafo n=500 & 30 & 0,2391 & 0,01838 & 0,2326 & 0,2457 & Normal (z) \\
+Floyd-Warshall (n=1000) & O(n³) & subgrafo n=1000 & 30 & 1,856 & 0,07731 & 1,829 & 1,884 & Normal (z) \\
 \bottomrule
 \end{tabular}
+\end{table}
