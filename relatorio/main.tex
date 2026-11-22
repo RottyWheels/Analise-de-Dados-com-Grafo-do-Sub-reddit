@@ -3,7 +3,8 @@
 % (main.tex, referencias.bib, valores.tex, valores_extra.tex, tabelas/, figuras/) e compile main.tex.
 % Sem o webmedia.cls (ex.: compilação local), cai para o acmart, no qual ele é baseado.
 \PassOptionsToPackage{expansion=false}{microtype} % evita erro com fontes não escaláveis em instalações locais
-\IfFileExists{webmedia.cls}{\documentclass[sigconf]{webmedia}}{\documentclass[sigconf]{acmart}}
+\newif\ifwebmedia
+\IfFileExists{webmedia.cls}{\webmediatrue\documentclass[sigconf]{webmedia}}{\documentclass[sigconf]{acmart}}
 
 \usepackage[brazilian]{babel}
 \usepackage{graphicx}
@@ -30,11 +31,18 @@
 \input{valores_extra.tex}
 
 \settopmatter{printacmref=false, printfolios=false}
-\setcopyright{none}
-\renewcommand\footnotetextcopyrightpermission[1]{}
-\acmConference{}{}{}
-\acmDOI{}
-\acmISBN{}
+\ifwebmedia
+  % comandos do webmedia.cls (template oficial)
+  \setevent{webmedia}
+  \proceedingsDetails[TP Teoria dos Grafos]{Trabalho Prático de Teoria dos Grafos -- IC/UFBA}{2026}{Salvador/BA, Brasil}
+\else
+  % compilação local com acmart
+  \setcopyright{none}
+  \renewcommand\footnotetextcopyrightpermission[1]{}
+  \acmConference{}{}{}
+  \acmDOI{}
+  \acmISBN{}
+\fi
 
 % ------------------------------------------------------------------ autor
 \newcommand{\autorNome}{Edwu Morais Braga}
