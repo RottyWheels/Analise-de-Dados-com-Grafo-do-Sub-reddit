@@ -84,7 +84,7 @@ def caminho_medio_amostrado(adj: dict, fontes: int = 1000, seed: int = 0):
         soma += sum(d.values())
         cont += len(d) - 1
         ecc[s] = max(d.values())
-    return soma / cont, max(ecc.values()), ecc
+    return (soma / cont if cont else 0.0), max(ecc.values()), ecc
 
 
 # ---------------------------------------------------------------- grafos aleatórios
