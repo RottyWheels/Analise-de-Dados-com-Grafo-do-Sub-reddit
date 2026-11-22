@@ -42,3 +42,18 @@ def test_formatacao_brasileira():
     assert _fmt_num(2464.5) == "2.464,5"
     tex = tabela_latex(pd.DataFrame({"x": [1.5]}, index=["a"]), "Legenda", "tab:x")
     assert "\\caption{Legenda}" in tex and "\\label{tab:x}" in tex and "1,5" in tex
+
+
+def test_texto_brasileiro():
+    from src.analise import br, pct
+    assert br(35776) == "35.776" and br(0.01636) == "0,01636" and br(True) == "sim"
+    assert br(25435.5313, 8) == "25.435,531" and pct(0.969) == "96,9%"
+
+
+def test_escala_preserva_n_do_grafo():
+    import networkx as nx
+    from src import medicao as Me
+    grafos = [nx.path_graph(50), nx.path_graph(200)]
+    casos = {"BFS": (lambda G: {u: list(G[u]) for u in G}, lambda a, i: A.bfs(a, 0), lambda n, m: n + m)}
+    df = Me.escala(casos, grafos, reps=3)
+    assert df["n"].tolist() == [50, 200] and (df["reps"] == 3).all()

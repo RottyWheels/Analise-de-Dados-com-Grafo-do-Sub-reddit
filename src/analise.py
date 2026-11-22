@@ -13,6 +13,22 @@ from . import modelos as Mo
 from . import tratamento as T
 
 
+# ---------------------------------------------------------------- formatação em português
+def br(x, casas: int = 4) -> str:
+    """Texto em formato brasileiro (para células de tabela): 35.776 · 0,1862 · 96,9% · sim/não."""
+    if isinstance(x, bool):
+        return "sim" if x else "não"
+    if isinstance(x, int) or (isinstance(x, float) and x.is_integer() and abs(x) >= 1000):
+        return f"{int(x):,}".replace(",", ".")
+    if abs(x) >= 1000:  # casas > 5 mantém decimais (ex.: br(25435.5313, 8) -> 25.435,531)
+        return f"{x:,.{max(0, casas - 5)}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{x:.{casas}g}".replace(".", ",")
+
+
+def pct(x: float, casas: int = 1) -> str:
+    return f"{100 * x:.{casas}f}%".replace(".", ",")
+
+
 # ---------------------------------------------------------------- matrícula
 def indice_grafo(M_: int, verbose: bool = True) -> int:
     """f(M) = ((soma dos dígitos de M) × (últimos 2 dígitos de M + 1)) mod 129; 0 -> 129."""
@@ -28,13 +44,13 @@ def indice_grafo(M_: int, verbose: bool = True) -> int:
 # ---------------------------------------------------------------- tratamento
 def tabela_tratamentos(df, e_dir, e_und, G_lcc) -> pd.DataFrame:
     return pd.DataFrame([
-        ["Temporal → estático", "União de todos os posts de 31/12/2013 a 30/04/2017", f"{len(df):,} posts"],
+        ["Temporal → estático", "União de todos os posts de 31/12/2013 a 30/04/2017", f"{br(len(df))} posts"],
         ["Remoção de auto-loops", "Verificado: o arquivo não tem auto-loops", f"{int((df.src == df.dst).sum())} removidos"],
-        ["Multigrafo → simples (dirigido)", "Uma aresta por par (u→v); count = nº de posts; sign = sinal majoritário", f"{len(e_dir):,} arestas"],
-        ["Dirigido → não dirigido", "Junta u→v e v→u; count somado; sign pelo saldo ponderado", f"{len(e_und):,} arestas"],
+        ["Multigrafo → simples (dirigido)", "Uma aresta por par (u→v); count = nº de posts; sign = sinal majoritário", f"{br(len(e_dir))} arestas"],
+        ["Dirigido → não dirigido", "Junta u→v e v→u; count somado; sign pelo saldo ponderado", f"{br(len(e_und))} arestas"],
         ["Pesos", "w = 1/count (pares com mais links ficam mais próximos)", "Dijkstra, Bellman-Ford, Floyd-Warshall, AGM"],
         ["Maior componente conexa", "Usada em distâncias, small-world e robustez",
-         f"{G_lcc.number_of_nodes():,} vértices / {G_lcc.number_of_edges():,} arestas"],
+         f"{br(G_lcc.number_of_nodes())} vértices / {br(G_lcc.number_of_edges())} arestas"],
         ["Subgrafos de teste", "Subgrafos induzidos conexos por BFS (n = 100 a 16.000)", "Floyd-Warshall e curvas de tempo"],
         ["Atributos descartados", "Vetor PROPERTIES (86 atributos de texto) e POST_ID", "economia de memória"],
     ], columns=["Tratamento", "Descrição", "Resultado"]).set_index("Tratamento")
@@ -54,7 +70,7 @@ def tabela_parte1(rg, comps, dist, clust) -> pd.DataFrame:
         ["Densidade", rg["densidade"], "G_und", "sim"],
         ["Número de componentes conexas", len(comps), "G_und", "sim"],
         ["Tamanho de cada componente", "tabela 03", "G_und", "sim"],
-        ["Tamanho da maior componente", f"{len(comps[0])} ({len(comps[0]) / n:.1%})", "G_und", "sim"],
+        ["Tamanho da maior componente", f"{br(len(comps[0]))} ({pct(len(comps[0]) / n)})", "G_und", "sim"],
         ["Diâmetro", dist["diametro"], "maior componente", "sim (exato, BFS própria)"],
         ["Raio", dist["raio"], "maior componente", "sim (exato, BFS própria)"],
         ["Comprimento médio dos caminhos", round(dist["caminho_medio"], 4), "maior componente", "sim (exato, BFS própria)"],
@@ -119,7 +135,7 @@ def casos_escala(G_dir):
 
 # ---------------------------------------------------------------- Parte III: descobertas
 def top10(d: dict) -> list:
-    return [f"{k} ({v:.4g})" for k, v in sorted(d.items(), key=lambda x: -x[1])[:10]]
+    return [f"{k} ({br(v)})" for k, v in sorted(d.items(), key=lambda x: -x[1])[:10]]
 
 
 def tabela_hubs(G_dir, btw: dict, pr: dict) -> pd.DataFrame:
