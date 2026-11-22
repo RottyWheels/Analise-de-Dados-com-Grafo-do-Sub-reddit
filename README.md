@@ -71,7 +71,7 @@ Os números do texto vêm de macros geradas pelo notebook (`resultados/valores.t
 reexecutar a análise, o relatório se atualiza sozinho.
 
 Para compilar no **Overleaf**: abra o [template WebMedia](https://www.overleaf.com/latex/templates/webmedia-template/ckjcbscxjjjh)
-com "Open as Template", envie o conteúdo de `relatorio/` (main.tex, referencias.bib, valores.tex,
+com "Open as Template", envie o conteúdo de `relatorio/` (main.tex, referencias.bib, valores.tex, valores_extra.tex,
 tabelas/ e figuras/) e compile `main.tex`. Ele usa o `webmedia.cls` do template quando existe; sem ele
 (compilação local), usa o `acmart`, no qual o `webmedia.cls` é baseado.
 

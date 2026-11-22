@@ -1,6 +1,6 @@
 % Relatório do TP "Analisando Grafos do SNAP" -- G13 soc-RedditHyperlinks
 % Overleaf: abra o template WebMedia ("Open as Template"), envie esta pasta inteira
-% (main.tex, referencias.bib, valores.tex, tabelas/, figuras/) e compile main.tex.
+% (main.tex, referencias.bib, valores.tex, valores_extra.tex, tabelas/, figuras/) e compile main.tex.
 % Sem o webmedia.cls (ex.: compilação local), cai para o acmart, no qual ele é baseado.
 \PassOptionsToPackage{expansion=false}{microtype} % evita erro com fontes não escaláveis em instalações locais
 \IfFileExists{webmedia.cls}{\documentclass[sigconf]{webmedia}}{\documentclass[sigconf]{acmart}}
@@ -27,6 +27,7 @@
 \DeclareUnicodeCharacter{2079}{\textsuperscript{9}}
 \graphicspath{{figuras/}}
 \input{valores.tex}
+\input{valores_extra.tex}
 
 \settopmatter{printacmref=false, printfolios=false}
 \setcopyright{none}
@@ -62,8 +63,11 @@ calculamos suas medidas estruturais, implementamos e medimos os algoritmos da di
 as propriedades de mundo pequeno, lei de potência e robustez. A rede é de mundo pequeno
 (diâmetro \diametro, caminho médio \caminhoMedio), tem distribuição de graus de cauda pesada
 ($\gamma \approx \gammaMLE$) e é robusta a falhas aleatórias, mas frágil a ataques: remover os 5\% de
-maior grau reduz a maior componente a \Sgrau{} do tamanho original. Código, dados tratados e
-resultados estão em \repo.
+maior grau reduz a maior componente a \Sgrau{} do tamanho original. Uma comparação com grafos
+aleatórios de mesma sequência de graus mostra que os caminhos curtos se devem aos hubs, mas que o
+agrupamento local vai além do que os graus explicam. Os links negativos, por fim, revelam uma
+assimetria: poucas comunidades de meta-discussão concentram o conflito e o dirigem às grandes
+comunidades gerais. Código, dados tratados e resultados estão em \repo.
 \end{abstract}
 
 \keywords{teoria dos grafos, redes complexas, Reddit, mundo pequeno, lei de potência, robustez}
@@ -76,12 +80,16 @@ Redes sociais on-line se organizam em comunidades que se citam, cooperam e entra
 No Reddit, cada comunidade é um \emph{subreddit}, e um post que cita outro subreddit cria uma relação
 dirigida entre os dois. \citet{kumar2018} reuniram esses hiperlinks e rotularam cada um como positivo
 ou negativo (hostil), conforme o tom do post. O resultado, disponível no SNAP~\cite{snap}, é um grafo
-dirigido, temporal e com sinal.
+dirigido, temporal e com sinal, o que o torna um bom objeto de estudo para os conceitos da disciplina:
+ele exige escolhas de tratamento, é grande o bastante para que a complexidade dos algoritmos importe
+e tem estrutura suficiente para que as propriedades de redes complexas tenham interpretação concreta.
 
-Este relatório aplica os conceitos da disciplina a esse grafo: tratamento dos dados, medidas
-estruturais (Parte~I), implementação e análise de complexidade de algoritmos clássicos (Parte~II) e
-investigação de propriedades de redes complexas (Parte~III). Todas as medidas e algoritmos são
-implementações próprias, testadas contra o NetworkX.
+Este relatório segue as três partes do enunciado. Na Parte~I, calculamos as medidas estruturais do
+grafo tratado. Na Parte~II, implementamos os algoritmos estudados, verificamos seus resultados e
+comparamos a complexidade teórica com o tempo medido. Na Parte~III, investigamos se a rede é de mundo
+pequeno, se a distribuição de graus segue uma lei de potência e quão robusta ela é a remoções de
+vértices, e discutimos o que esses resultados dizem sobre a dinâmica entre comunidades. Todas as
+medidas e algoritmos são implementações próprias, testadas contra o NetworkX.
 
 % =================================================================================
 \section{Determinação do Grafo}
@@ -91,156 +99,280 @@ usando 129 quando o resultado é 0. Para $M = 224216276$:
 \begin{itemize}
   \item soma dos dígitos: $2+2+4+2+1+6+2+7+6 = 32$;
   \item últimos dois dígitos: $76$, logo $76 + 1 = 77$;
-  \item $(32 \times 77) \bmod 129 = 2464 \bmod 129 = 13$.
+  \item $(32 \times 77) \bmod 129 = 2464 \bmod 129 = 13$, pois $129 \times 19 = 2451$ e $2464 - 2451 = 13$.
 \end{itemize}
 O grafo atribuído é o \textbf{G13, \texttt{soc-RedditHyperlinks}} (categoria \emph{Social networks}).
 O mesmo conjunto de dados aparece na planilha também como G72 (\emph{Signed}), G92 (\emph{Temporal}) e
-G109 (\emph{Online communities}); usamos a entrada G13, indicada pela regra.
+G109 (\emph{Online communities}), porque a lista replica o índice do SNAP, que cataloga um conjunto em
+todas as categorias a que ele pertence. Usamos a entrada G13, indicada pela regra. O código confere a
+regra com os dois exemplos do enunciado (225216327 $\rightarrow$ G66 e 2025000078 $\rightarrow$ G90).
 
 % =================================================================================
 \section{Código e Dados}
-O repositório \repo{} contém o código (\texttt{src/}), os testes (\texttt{tests/}, 44 testes com o
-NetworkX como referência), o notebook que executa todos os experimentos, os dados tratados
-(\texttt{data/processed/}), as figuras e as tabelas. O \texttt{README} explica a instalação e a
-execução; \texttt{scripts/run\_all.py} reproduz tudo sem abrir o Jupyter, e
-\texttt{scripts/verificar\_dados.py} confere o arquivo baixado contra as contagens esperadas.
+O repositório \repo{} contém:
+\begin{itemize}
+  \item \texttt{src/}: toda a lógica, separada por assunto (tratamento, algoritmos, métricas,
+    distâncias, centralidades, modelos, robustez, medição de tempo, tabelas e figuras);
+  \item \texttt{tests/}: 44 testes automatizados que comparam cada implementação com o NetworkX;
+  \item \texttt{notebook.ipynb}: executa todos os experimentos e guarda as saídas;
+  \item \texttt{data/processed/}: as listas de arestas tratadas (o arquivo bruto, de 319~MB, é baixado
+    por \texttt{data/raw/download.py});
+  \item \texttt{figuras/} e \texttt{resultados/}: figuras em PNG e PDF e tabelas em CSV e \LaTeX;
+  \item \texttt{scripts/}: \texttt{run\_all.py} reproduz tudo sem abrir o Jupyter,
+    \texttt{verificar\_dados.py} confere o arquivo baixado contra as contagens esperadas e
+    \texttt{gerar\_relatorio.py} monta as tabelas e os números deste relatório.
+\end{itemize}
+O \texttt{README} explica a instalação e a execução e traz uma tabela que liga cada requisito do
+enunciado à seção do notebook, ao código e ao arquivo de saída correspondentes. Os números citados no
+texto não são digitados: são macros geradas a partir dos resultados, de modo que uma nova execução
+atualiza o relatório inteiro.
 
 % =================================================================================
 \section{Descrição do Grafo Original}
 O SNAP distribui dois arquivos: hiperlinks no corpo dos posts (\emph{body}) e no título (\emph{title}).
 Usamos o arquivo \emph{body}, com \postsTotal{} linhas. Cada linha registra o subreddit de origem, o de
 destino, o identificador do post, a data, o sinal do link ($+1$ ou $-1$) e um vetor de 86 atributos
-de texto. O período vai de 31/12/2013 a 30/04/2017. Há \linksNeg{} links negativos (\fracNeg). A
-Figura~\ref{fig:original} mostra o volume mensal de posts e a proporção dos sinais.
+de texto (contagens de palavras, sentimento, legibilidade etc.). O período vai de 31/12/2013 a
+30/04/2017.
+
+A Figura~\ref{fig:original} mostra o volume mensal de posts e a proporção dos sinais. O volume cresce
+ao longo do período, acompanhando o crescimento da plataforma, sem lacunas que exigissem filtragem
+temporal. Os links negativos são minoria: \linksNeg{} posts, ou \fracNeg{} do total. Muitos pares de
+subreddits se citam várias vezes: em média, cada par dirigido aparece em \postsPorPar{} posts, e o par
+mais frequente, em \postsPorParMax. Essa repetição é o que torna o grafo original um multigrafo
+temporal.
 
 Os números da planilha da disciplina (55.863 vértices e 858.490 arestas) descrevem o conjunto completo,
-somando \emph{body} e \emph{title}; por isso diferem dos nossos.
+somando \emph{body} e \emph{title}; por isso diferem dos nossos. Escolhemos o \emph{body} por ser o
+arquivo mais usado na literatura sobre esses dados e porque, num grafo que já exige reduções para os
+algoritmos cúbicos, o arquivo extra aumentaria o custo sem mudar o tipo de análise possível.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{01_original_tempo_sinal.pdf}
-  \caption{Posts com hiperlink por mês e proporção dos sinais no arquivo original.}
+  \caption{Posts com hiperlink por mês (esquerda) e quantidade de links positivos e negativos
+  (direita) no arquivo original.}
   \label{fig:original}
 \end{figure}
 
 % =================================================================================
 \section{Tratamento dos Dados}
-A Tabela~\ref{tab:tratamento} resume os tratamentos. Os principais foram:
+A Tabela~\ref{tab:tratamento} resume os tratamentos e o efeito de cada um. Os principais foram:
 \begin{enumerate}
-  \item \textbf{Temporal $\rightarrow$ estático:} união de todos os posts do período.
-  \item \textbf{Multigrafo $\rightarrow$ simples:} uma aresta por par $(u \rightarrow v)$, com
-    \texttt{count} (nº de posts) e \texttt{sign} (sinal majoritário). O grafo dirigido tem
-    \nArestasDir{} arestas.
-  \item \textbf{Dirigido $\rightarrow$ não dirigido:} $u \rightarrow v$ e $v \rightarrow u$ viram uma
-    aresta, com contagens somadas: \nArestas{} arestas. O grafo dirigido foi mantido para Tarjan,
-    Euler dirigido e PageRank.
-  \item \textbf{Pesos:} $w = 1/\texttt{count}$, para que pares com mais links fiquem mais próximos.
-    São pesos reais, não sintéticos.
-  \item \textbf{Maior componente conexa:} \nLCC{} vértices (\fracLCC) e \mLCC{} arestas, usada nas
-    medidas de distância, no small-world e na robustez.
+  \item \textbf{Temporal $\rightarrow$ estático:} união de todos os posts do período. A análise
+    temporal fica fora do escopo; todas as perguntas do enunciado se referem à estrutura agregada.
+  \item \textbf{Multigrafo $\rightarrow$ simples:} uma aresta por par $(u \rightarrow v)$, com dois
+    atributos: \texttt{count}, o número de posts, e \texttt{sign}, o sinal majoritário (positivo em caso
+    de empate). O grafo dirigido resultante tem \nArestasDir{} arestas, contra \postsTotal{} posts.
+  \item \textbf{Dirigido $\rightarrow$ não dirigido:} $u \rightarrow v$ e $v \rightarrow u$ viram uma só
+    aresta, com contagens somadas e sinal dado pelo saldo ponderado: \nArestas{} arestas. A maioria das
+    medidas pedidas (diâmetro, clusterização, small-world, árvore geradora) é definida para grafos não
+    dirigidos. O grafo dirigido foi mantido para Tarjan, Euler dirigido e PageRank, em que a direção é
+    essencial.
+  \item \textbf{Pesos:} $w = 1/\texttt{count}$, para que pares com mais links fiquem mais próximos nos
+    algoritmos ponderados. São pesos reais, derivados dos dados, e não sintéticos.
+  \item \textbf{Maior componente conexa:} \nLCC{} vértices (\fracLCC) e \mLCC{} arestas. Ela é usada nas
+    medidas de distância (infinitas num grafo desconexo), no small-world e na robustez, como recomenda o
+    Apêndice~C.
+  \item \textbf{Subgrafos de teste:} subgrafos induzidos e conexos, coletados por BFS, com 100 a 16.000
+    vértices, para o Floyd-Warshall e para as curvas de tempo.
 \end{enumerate}
-O arquivo não tem auto-laços. Descartamos o vetor de atributos de texto, que não é usado nas
-análises e ocupa a maior parte dos 319~MB do arquivo.
+O arquivo não tem auto-laços; a verificação está registrada na tabela. Descartamos o vetor de atributos
+de texto, que não é usado nas análises e ocupa a maior parte dos 319~MB do arquivo.
 
 \input{tabelas/tratamento.tex}
 
 % =================================================================================
 \section{Metodologia}
-\textbf{Implementação.} O código é Python~3 com listas de adjacência em dicionários. Pandas é usado
-para ler os dados e o NetworkX apenas para montar o grafo e conferir resultados nos testes; o igraph
-confere, de forma opcional, as distâncias e o betweenness exatos. Os algoritmos seguem
-\citet{cormen2009} e \citet{tarjan1972}.
+\textbf{Implementação e validação.} O código é Python~3, com listas de adjacência em dicionários.
+Pandas é usado para ler os dados, e o NetworkX apenas para montar o grafo, gerar o desenho e servir de
+referência nos testes; o igraph confere, de forma opcional, as distâncias e o betweenness exatos. Os
+algoritmos seguem \citet{cormen2009} e \citet{tarjan1972}. Cada implementação tem testes que comparam
+sua saída com a do NetworkX em grafos aleatórios e em casos construídos (ciclos, caminhos, estrelas,
+ciclos negativos), e o notebook roda essa suíte antes de qualquer experimento.
 
 \textbf{Distâncias.} Diâmetro, raio e caminho médio são exatos: uma BFS a partir de cada um dos
-\nLCC{} vértices da maior componente, distribuídas entre \nucleos{} núcleos (\tDist~s no total).
+\nLCC{} vértices da maior componente, distribuídas entre \nucleos{} núcleos (\tDist~s no total). A
+excentricidade de cada vértice é a maior distância da sua BFS; o diâmetro e o raio são o máximo e o
+mínimo das excentricidades, e o caminho médio é a soma de todas as distâncias dividida pelo número de
+pares ordenados.
 
 \textbf{Tempo de execução.} Cada medição tem uma execução de aquecimento descartada e roda com o
-coletor de lixo do Python desligado. No grafo completo, cada algoritmo roda 30 vezes, com origens
-sorteadas; com $n \geq 30$, o intervalo de confiança de 95\% é $\bar{x} \pm z_{\alpha/2}\,s/\sqrt{n}$.
-Para a complexidade observada, medimos subgrafos conexos de tamanho crescente (coletados por BFS),
-com 10 repetições por tamanho e IC pela t-Student ($n < 30$), e ajustamos o tempo médio a
-$c \cdot f(n,m)$ por mínimos quadrados.
+coletor de lixo do Python desligado, o que reduz a variância entre repetições. No grafo completo, cada
+algoritmo roda 30 vezes, com origens sorteadas a cada repetição. Com $n \geq 30$, o intervalo de
+confiança de 95\% é $\bar{x} \pm z_{\alpha/2}\,s/\sqrt{n}$, com $z_{0{,}025} = 1{,}96$. Para a
+complexidade observada, medimos subgrafos conexos de tamanho crescente, com 10 repetições por tamanho
+e IC pela t-Student ($n < 30$), e ajustamos o tempo médio a $c \cdot f(n,m)$ por mínimos quadrados,
+sendo $f$ a complexidade teórica.
 
-\textbf{Small-world, lei de potência e robustez.} Seguimos os apêndices do enunciado. O grafo
-aleatório de referência é um $G(n,m)$ gerado por código próprio~\cite{erdos1959}; acrescentamos um
-segundo nulo, que preserva a sequência de graus por trocas duplas de arestas~\cite{maslov2002}.
-O expoente $\gamma$ é estimado por regressão linear em escala log-log e por máxima
-verossimilhança~\cite{clauset2009}. Na robustez, removemos $r = \lceil 0{,}05\,n \rceil = \rRemover$
-vértices ao acaso (30 repetições) ou os de maior centralidade, com ranking fixo, por grau,
-betweenness (algoritmo de \citet{brandes2001} com 1.000 fontes sorteadas~\cite{brandes2007}) e
-PageRank~\cite{page1999}.
+\textbf{Small-world.} Seguindo o Apêndice~A, comparamos o comprimento médio dos caminhos $L$ e a
+clusterização média $C$ do grafo com os de um grafo aleatório equivalente: um $G(n,m)$ com o mesmo
+número de vértices e arestas~\cite{erdos1959}, gerado por código próprio (média de 5 grafos). Como o
+$G(n,m)$ não reproduz hubs, acrescentamos um segundo nulo, que preserva o grau de cada vértice por
+trocas duplas de arestas~\cite{maslov2002}: $(a,b),(c,d) \rightarrow (a,d),(c,b)$, rejeitando laços e
+arestas repetidas, com três trocas por aresta e três repetições. Nas comparações, $L$ é estimado com
+300 BFS a partir de vértices sorteados.
+
+\textbf{Lei de potência.} Seguindo o Apêndice~B, estimamos $\gamma$ por regressão linear em
+$\log P(k)$ por $\log k$, tanto com $P(k)$ bruto quanto com um histograma de bins logarítmicos; pela
+regressão na distribuição acumulada complementar (CCDF), cuja inclinação é $-(\gamma - 1)$; e por
+máxima verossimilhança com $k_{min}$ escolhido pela menor distância de Kolmogorov-Smirnov~\cite{clauset2009}.
+
+\textbf{Robustez.} Seguindo o Apêndice~C, trabalhamos na maior componente, com $n = |V|$ e
+$r = \lceil 0{,}05\,n \rceil = \rRemover$. Na remoção aleatória, sorteamos $r$ vértices em 30
+repetições. No ataque direcionado, removemos de uma vez os $r$ vértices de maior centralidade (ranking
+fixo), por três critérios: grau; betweenness, estimado pelo algoritmo de \citet{brandes2001} com 1.000
+fontes sorteadas e fator de escala $n/k$~\cite{brandes2007}; e PageRank~\cite{page1999}, por iteração
+de potência no grafo dirigido ponderado pelo número de posts. Medimos o tamanho relativo da maior
+componente ($S$, métrica~A), o número de componentes ($c$, B), o caminho médio na maior componente
+(C) e a fração de vértices isolados (D).
 
 % =================================================================================
 \section{Resultados}
 
 \subsection{Parte I: análise estrutural}
-A Tabela~\ref{tab:parte1} reúne as medidas; todas foram calculadas. O grafo é muito esparso
-(densidade \densidade) e quase conexo: a maior componente concentra \fracLCC{} dos vértices, e as
-outras \nComponentes{} componentes são, em sua maioria, pares ou trios de subreddits isolados.
-O grau médio é \grauMedio, mas o máximo chega a \grauMax{} (\texttt{askreddit}): a distribuição de graus
-(Figura~\ref{fig:graus}) é muito assimétrica.
+A Tabela~\ref{tab:parte1} reúne as medidas e indica que todas foram calculadas, e calculadas de forma
+exata. Os números descrevem uma rede ao mesmo tempo grande, esparsa e compacta.
 
-Apesar do tamanho, a rede é compacta: diâmetro \diametro, raio \raio{} e caminho médio
-\caminhoMedio{} na maior componente. A clusterização média é \clustMedio{}, com \nTriangulos{}
-triângulos. A transitividade global (\transitividade) é bem menor que a clusterização média, sinal de
-que os triângulos se concentram em vértices de grau baixo, enquanto os hubs ligam vizinhos que não se
-conectam entre si. A Figura~\ref{fig:visual} mostra o núcleo da rede.
+\textbf{Tamanho e densidade.} São \nVertices{} subreddits e \nArestas{} arestas, com densidade
+\densidade: de cada 10 mil pares possíveis, só cerca de dois estão ligados. É o esperado numa rede
+social real, em que cada comunidade interage com uma fração ínfima das demais.
+
+\textbf{Componentes.} O grafo é quase conexo. A maior componente concentra \fracLCC{} dos vértices;
+as outras \nComponentes{} componentes são minúsculas: a segunda maior tem \segundaComp{} vértices, e
+há \compPares{} pares e \compTrios{} trios isolados. São, em geral, comunidades pequenas que só
+interagiram entre si, como mostra a tabela de tamanhos em \texttt{resultados/03\_tamanho\_componentes}.
+
+\textbf{Graus.} O grau médio é \grauMedio, mas esse número esconde uma distribuição muito desigual:
+a mediana é \grauMediana{} (\fracGrauUm{} dos subreddits têm um único vizinho), enquanto o grau máximo
+chega a \grauMax{} (\texttt{askreddit}). O 1\% de vértices de maior grau toca \fracArestasTop{} de
+todas as arestas. A Figura~\ref{fig:graus} mostra essa assimetria: no histograma em escala log-log, a
+frequência cai de forma aproximadamente linear ao longo de três ordens de grandeza, e a CCDF mostra que
+ainda há vértices com milhares de vizinhos.
+
+\textbf{Distâncias.} Apesar do tamanho, a rede é compacta: na maior componente, o diâmetro é
+\diametro, o raio é \raio{} e o caminho médio é \caminhoMedio. Qualquer subreddit alcança qualquer outro,
+em média, em menos de quatro saltos, e o mais distante dos pares está a \diametro{} saltos. O raio igual
+a \raio{} e o diâmetro quase o dobro disso indicam um núcleo central do qual todo vértice está a no
+máximo seis passos, com algumas cadeias periféricas compridas.
+
+\textbf{Clusterização.} A clusterização média é \clustMedio, com \nTriangulos{} triângulos. Isso quer
+dizer que, em média, quase um em cada cinco pares de vizinhos de um subreddit também se cita. A
+transitividade global (\transitividade) é três vezes menor. A diferença é informativa: a clusterização
+média dá o mesmo peso a todos os vértices, e os de grau baixo, que são a maioria, costumam ter vizinhos
+interligados; a transitividade pondera pelos pares de vizinhos, dominados pelos hubs, cujos milhares de
+vizinhos raramente se conectam entre si. Os hubs funcionam como pontes entre grupos, não como centros
+de grupos coesos.
+
+\textbf{Visualização.} A Figura~\ref{fig:visual} mostra o subgrafo induzido pelos 150 subreddits de
+maior grau. O desenho completo, com 35 mil vértices, seria ilegível. Mesmo nesse recorte, o núcleo é
+denso e sem divisões claras: os grandes subreddits gerais (\texttt{askreddit}, \texttt{pics},
+\texttt{videos}) ocupam o centro, e as arestas laranja, de sinal negativo, aparecem espalhadas por
+todo o núcleo, e não concentradas num canto.
 
 \input{tabelas/parte1.tex}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{03_distribuicao_graus.pdf}
-  \caption{Distribuição de graus: histograma com bins logarítmicos e CCDF.}
+  \caption{Distribuição de graus: histograma com bins logarítmicos (esquerda) e CCDF (direita),
+  ambos em escala log-log.}
   \label{fig:graus}
 \end{figure}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.9\linewidth]{03b_visualizacao.pdf}
-  \caption{Subgrafo dos 150 subreddits de maior grau; arestas laranja têm sinal negativo.}
+  \caption{Subgrafo dos 150 subreddits de maior grau. O tamanho do vértice é proporcional ao grau no
+  subgrafo; arestas laranja têm sinal negativo.}
   \label{fig:visual}
 \end{figure}
 
 \subsection{Parte II: algoritmos}
-A Tabela~\ref{tab:algoritmos} resume a saída de cada algoritmo e a Tabela~\ref{tab:tempos}, os tempos.
-\begin{itemize}
-  \item \textbf{BFS e DFS} alcançam toda a maior componente; a excentricidade de \texttt{askreddit} é
-    igual ao raio.
-  \item \textbf{Euler:} o grafo não é euleriano nem semieuleriano, por ser desconexo e ter milhares de
-    vértices de grau ímpar; no dirigido, quase todos os vértices têm entrada diferente da saída.
-  \item \textbf{Dijkstra e Bellman-Ford} dão as mesmas distâncias. Bellman-Ford convergiu em
-    \iterBFmin{} a \iterBFmax{} rodadas, muito menos que as $n-1$ do pior caso, porque a implementação
-    para quando uma rodada não altera nenhuma distância.
-  \item \textbf{Bellman-Ford com sinal:} usando o sinal dos links como peso, há ciclos negativos,
-    ou seja, ciclos de hostilidade líquida entre comunidades. Nesse caso não existe caminho mínimo bem
-    definido; é o cenário em que Bellman-Ford se aplica e Dijkstra não.
-  \item \textbf{Floyd-Warshall} só roda em subgrafos: no grafo inteiro, a matriz de distâncias teria
-    $34.671^2 \approx 1{,}2\cdot10^9$ células (cerca de 9,6~GB). A versão vetorizada com numpy leva
-    \tFWQuinhentos~s com 500 vértices, contra \tFWpuroQuinhentos~s da versão em Python puro.
-  \item \textbf{Tarjan:} há \nSCC{} componentes fortemente conexas, mas a maior tem \maiorSCC{}
-    vértices (\fracSCC): a maioria dos subreddits só envia ou só recebe links. Na maior componente
-    não dirigida há \nPontes{} pontes e \nArticulacoes{} vértices de articulação, quase todos
-    subreddits pendurados em um único vizinho.
-  \item \textbf{Prim e Kruskal} produzem árvores geradoras com o mesmo peso (\pesoAGM).
-\end{itemize}
+A Tabela~\ref{tab:algoritmos} resume a saída de cada algoritmo no G13, e a Tabela~\ref{tab:tempos},
+o tempo de cada um. A seguir comentamos cada algoritmo, com o resultado, a complexidade teórica e o
+tempo observado.
+
+\textbf{BFS e DFS} ($O(n+m)$). As duas buscas, a partir de \texttt{askreddit}, alcançam os \nLCC{}
+vértices da maior componente, como esperado. A BFS também dá a excentricidade da origem, \raio{}, igual
+ao raio do grafo: \texttt{askreddit} é um dos centros da rede. A DFS é iterativa, com pilha explícita,
+para não esbarrar no limite de recursão do Python em caminhos longos. Os tempos médios são
+\tBFS~ms e \tDFS~ms, com intervalos de confiança estreitos (Tabela~\ref{tab:tempos}).
+
+\textbf{Eulerianidade} ($O(n+m)$). O grafo não é euleriano nem semieuleriano: é desconexo e tem
+milhares de vértices de grau ímpar, enquanto um ciclo euleriano exige grau par em todos e um caminho
+euleriano admite no máximo dois ímpares. No grafo dirigido, a condição (grau de entrada igual ao de
+saída em todo vértice) falha em quase todos os vértices, reflexo da assimetria entre quem cita e quem é
+citado. A verificação custa \tEulerU~ms no não dirigido e \tEulerD~ms no dirigido.
+
+\textbf{Dijkstra} ($O((n+m)\log n)$, com heap binário) e \textbf{Bellman-Ford} ($O(n \cdot m)$). Com
+$w = 1/\texttt{count}$, os dois produzem exatamente as mesmas distâncias a partir de
+\texttt{askreddit}, o que valida as implementações entre si. O Bellman-Ford convergiu em \iterBFmin{}
+a \iterBFmax{} rodadas, conforme a origem, muito menos que as $n-1$ do pior caso: a implementação para
+quando uma rodada não altera nenhuma distância, e num grafo de diâmetro pequeno isso acontece cedo. Por
+isso o Bellman-Ford leva só \tBF~ms, cerca de três vezes o Dijkstra (\tDijkstra~ms), e não milhares de
+vezes, como o pior caso sugeriria.
+
+\textbf{Bellman-Ford com sinal.} O G13 permite um experimento que um grafo sem sinal não permite.
+Usando o próprio sinal dos links como peso ($-1$ para links negativos) num subgrafo dirigido de 2.000
+vértices, o algoritmo detecta ciclos negativos, isto é, ciclos de comunidades em que a hostilidade
+líquida ao longo do ciclo é negativa. Nesse cenário não existe caminho mínimo bem definido, porque
+percorrer o ciclo de novo sempre diminui a distância; o Dijkstra daria uma resposta errada sem perceber,
+e o Bellman-Ford é o algoritmo adequado justamente por detectar a situação.
+
+\textbf{Floyd-Warshall} ($O(n^3)$). No grafo inteiro, a matriz de distâncias teria
+$34.671^2 \approx 1{,}2\cdot10^9$ células, cerca de 9,6~GB em ponto flutuante, além de
+$\approx 4\cdot10^{13}$ operações: por isso o algoritmo roda em subgrafos de 100 a 2.000 vértices.
+Implementamos duas versões com a mesma recorrência $D[i,j] = \min(D[i,j], D[i,k] + D[k,j])$: uma em
+Python puro, que pula as linhas que não alcançam $k$, e outra que vetoriza o passo de cada $k$ com
+numpy. A vetorizada é \razaoFWpuro{} vezes mais rápida com 500 vértices e, ao dobrar $n$ de 500 para
+1.000, o tempo cresce \razaoFWmil{} vezes, próximo do fator $2^3 = 8$ previsto.
+
+\textbf{Tarjan} ($O(n+m)$). Aplicado ao grafo dirigido, encontra \nSCC{} componentes fortemente
+conexas, mas a maior tem só \maiorSCC{} vértices (\fracSCC), e quase todas as demais são unitárias.
+Ou seja, a maioria dos subreddits ou só cita, ou só é citada, sem caminho de volta. Aplicado à maior
+componente não dirigida, o algoritmo de pontes e articulações encontra \nPontes{} pontes e
+\nArticulacoes{} vértices de articulação. O número alto se explica pelos vértices de grau 1: cada
+subreddit pendurado num único vizinho cria uma ponte, e esse vizinho vira articulação. Os dois custam
+\tTarjan~ms e \tPontes~ms.
+
+\textbf{Prim e Kruskal} ($O(m \log n)$ e $O(m \log m)$). Os dois produzem árvores geradoras com
+\nLCC{}~$-$~1 arestas e o mesmo peso total (\pesoAGM), o que confere as implementações entre si. Como
+$w = 1/\texttt{count}$, a árvore mínima privilegia os pares que mais se citam: é um esqueleto das
+relações mais fortes da rede. O Kruskal, com union-find, é mais rápido (\tKruskal~ms) que o Prim com
+heap (\tPrim~ms), porque ordena as arestas uma única vez, enquanto o Prim faz uma operação de heap por
+aresta examinada.
 
 \input{tabelas/algoritmos.tex}
 \input{tabelas/tempos.tex}
 
-\textbf{Complexidade observada.} A Figura~\ref{fig:escala} e a Tabela~\ref{tab:ajuste} comparam o
-tempo medido com a função teórica. Floyd-Warshall segue $n^3$ ($R^2 \approx 1$), e Dijkstra, Kruskal
-e Prim acompanham bem suas curvas. Para os algoritmos lineares, a curva $c\,(n+m)$ se ajusta pior:
-os subgrafos começam pelo núcleo denso, e a razão $m/n$ cai de cerca de 17 para 3,6 à medida que
-crescem. Como, em Python, visitar um vértice custa bem mais que percorrer uma aresta, um ajuste com
-custos separados, $a\,n + b\,m$, chega a $R^2 \approx 0{,}99$, compatível com $O(n+m)$. O
-Bellman-Ford fica abaixo do pior caso $O(n \cdot m)$: com poucas rodadas, o custo efetivo é
-$O(k \cdot m)$.
+\textbf{Complexidade observada.} A Figura~\ref{fig:escala} mostra o tempo médio de cada algoritmo em
+subgrafos de tamanho crescente, com o intervalo de confiança de cada ponto e a curva teórica ajustada;
+a Tabela~\ref{tab:ajuste} dá o $R^2$ de cada ajuste.
+\begin{itemize}
+  \item \textbf{Floyd-Warshall} segue $n^3$ quase perfeitamente ($R^2 = \rFW$ na versão numpy e
+    \rFWpuro{} na versão pura), o caso mais limpo, porque o número de operações não depende das arestas.
+  \item \textbf{Dijkstra, Kruskal e Prim} acompanham bem suas curvas ($R^2$ de \rDijkstra, \rKruskal{}
+    e \rPrim).
+  \item \textbf{Algoritmos lineares} (BFS, DFS, Euler, Tarjan) se ajustam pior à curva $c\,(n+m)$:
+    $R^2$ entre \rLinMin{} e \rLinMax. A causa está nos subgrafos de teste: como são coletados por BFS,
+    começam pelo núcleo denso, e a razão $m/n$ cai de cerca de 17 (com 1.000 vértices) para 3,6 (no
+    grafo completo). Uma única constante para $n + m$ supõe que visitar um vértice custa o mesmo que
+    percorrer uma aresta; em Python, o custo por vértice (inserção em dicionário, operação de fila) é
+    bem maior. Com custos separados, $t \approx a\,n + b\,m$, o $R^2$ sobe para acima de \rNMmin{} em
+    todos eles, compatível com $O(n+m)$.
+  \item \textbf{Bellman-Ford} se ajusta mal ao pior caso $c \cdot n \cdot m$ ($R^2 = \rBF$) e melhor ao
+    modelo $a\,n + b\,m$ ($R^2 = \rBFnm$). Como o número de rodadas quase não varia com o tamanho, o
+    custo efetivo $O(k \cdot m)$ se comporta como linear.
+\end{itemize}
+A lição geral é que a complexidade assintótica descreve o crescimento, mas a forma da curva medida
+também depende das constantes da linguagem e de como os dados de teste variam com o tamanho.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{04_complexidade_observada.pdf}
-  \caption{Tempo médio (IC de 95\%, t-Student) em subgrafos crescentes e curva teórica ajustada.}
+  \caption{Tempo médio (com IC de 95\%, t-Student, 10 repetições) em subgrafos de tamanho crescente e
+  curva teórica $c \cdot f(n,m)$ ajustada por mínimos quadrados.}
   \label{fig:escala}
 \end{figure*}
 
@@ -250,123 +382,204 @@ $O(k \cdot m)$.
 
 \textbf{(1) Mundo pequeno.} Pelo critério do enunciado, $L(G) \approx L_{\text{aleatório}}$ e
 $C(G) \gg C_{\text{aleatório}}$, a rede é de mundo pequeno (Tabela~\ref{tab:smallworld},
-Figura~\ref{fig:sw}): $C(G)$ é \razaoC{} vezes maior que o de um $G(n,m)$ equivalente, e $L(G)$ é até
-menor (razão \razaoL). O $G(n,m)$, porém, não tem hubs. Contra grafos aleatórios com a mesma sequência
-de graus, a vantagem de clusterização cai para \razaoCgraus{} vezes, e $L$ fica praticamente igual
-(razão \razaoLgraus). Ou seja: os caminhos curtos vêm dos hubs, e parte do agrupamento também, mas
-ainda há agrupamento local além do que os graus explicam. O resultado faz sentido para uma rede de
-comunidades temáticas (jogos, política, humor) que se citam entre si e passam por alguns hubs gerais.
-Na prática, uma discussão ou uma "brigada" iniciada num subreddit chega a quase qualquer outro em
-cerca de quatro saltos.
+Figura~\ref{fig:sw}). A clusterização é \razaoC{} vezes maior que a de um $G(n,m)$ equivalente
+(\Caleat, próximo do valor teórico $\bar{k}/n$), e o caminho médio é até menor que o do aleatório
+(\caminhoMedio{} contra \Laleat, razão \razaoL). O índice $\sigma = (C/C_{al})/(L/L_{al})$~\cite{humphries2008}
+vale \sigmaER, muito acima de 1.
+
+Esse primeiro resultado, porém, exagera. O $G(n,m)$ tem graus concentrados em torno da média e
+nenhum hub; parte do contraste vem só disso. Contra grafos aleatórios com a mesma sequência de graus, a
+vantagem de clusterização cai para \razaoCgraus{} vezes (\clustMedio{} contra \Cgraus), e o caminho médio
+fica praticamente igual (razão \razaoLgraus). A leitura correta é dupla:
+\begin{itemize}
+  \item \textbf{os caminhos curtos vêm dos hubs}: qualquer grafo com essa distribuição de graus tem
+    caminhos tão curtos quanto os do G13;
+  \item \textbf{o agrupamento local é real}: mesmo descontando os hubs, os vizinhos de um subreddit se
+    citam quatro vezes mais do que o acaso explicaria.
+\end{itemize}
+
+O resultado faz sentido para esta rede. Subreddits se organizam por tema (jogos, política, humor,
+tecnologia), e comunidades do mesmo tema se citam entre si, o que gera triângulos; ao mesmo tempo, os
+grandes subreddits gerais são citados por comunidades de todos os temas e encurtam as distâncias entre
+eles. A implicação prática é que qualquer conteúdo, discussão ou mobilização que comece num subreddit
+pode chegar a quase qualquer outro em cerca de quatro saltos, e quase sempre passando por um hub. Isso
+favorece a difusão de informação, mas também a de conflitos: uma "brigada" que parte de uma comunidade
+pequena alcança rapidamente as grandes.
 
 \input{tabelas/smallworld.tex}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{05_small_world.pdf}
-  \caption{Clusterização e caminho médio do G13 e dos dois modelos nulos.}
+  \caption{Clusterização média (escala log) e caminho médio do G13, do $G(n,m)$ e do nulo com os
+  mesmos graus.}
   \label{fig:sw}
 \end{figure}
 
-\textbf{(2) Lei de potência.} O gráfico de $\log P(k)$ por $\log k$ é aproximadamente linear
-(Figura~\ref{fig:potencia}), e todas as estimativas dão $\gamma > 1$ (Tabela~\ref{tab:potencia}).
-A regressão sobre $P(k)$ bruto dá $\gamma = \gammaBruto$ ($R^2 = \rBruto$), mas é distorcida pela
-cauda, onde muitos graus aparecem uma única vez. Com bins logarítmicos, $\gamma = \gammaBins$
-($R^2 = \rBins$); por máxima verossimilhança, $\gamma = \gammaMLE$ para $k \geq \kminMLE$. A
-distribuição é de cauda pesada, compatível com uma lei de potência com $2 < \gamma < 3$, longe da
-Poisson esperada num grafo aleatório. A CCDF cai mais rápido no extremo da cauda, o que sugere um
-corte para os maiores graus.
+\textbf{(2) Lei de potência.} Na Figura~\ref{fig:potencia}, o gráfico de $\log P(k)$ por $\log k$ é
+aproximadamente linear ao longo de três ordens de grandeza, e muito diferente da Poisson que um grafo
+aleatório com o mesmo grau médio teria (curva pontilhada), que se concentra em torno de $k \approx 7$ e
+some antes de $k = 30$. Todas as estimativas dão $\gamma > 1$ (Tabela~\ref{tab:potencia}), mas os
+métodos diferem, e a diferença é instrutiva:
+\begin{itemize}
+  \item a regressão sobre $P(k)$ bruto dá $\gamma = \gammaBruto$ ($R^2 = \rBruto$), puxada para baixo
+    pela cauda: ali, muitos graus aparecem uma única vez, formando um "piso" horizontal de pontos com
+    $P(k) = 1/n$ que achata a reta;
+  \item com bins logarítmicos, que agregam a cauda, $\gamma = \gammaBins$ ($R^2 = \rBins$);
+  \item a regressão na CCDF dá $\gamma = \gammaCCDF$, e a máxima verossimilhança, $\gamma = \gammaMLE$
+    para $k \geq \kminMLE$.
+\end{itemize}
+As três estimativas robustas concordam em $\gamma$ entre 2 e 2,4, faixa típica de redes sociais e de
+informação~\cite{barabasi1999}. A distribuição é, portanto, de cauda pesada, compatível com uma lei de
+potência. A CCDF, no entanto, cai mais rápido do que a reta no extremo da cauda (acima de algumas
+centenas de vizinhos), o que sugere um corte para os maiores graus: há um limite para quantas
+comunidades um subreddit consegue citar ou receber.
 
 \input{tabelas/potencia.tex}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{06_lei_potencia.pdf}
-  \caption{Distribuição de graus em escala log-log com as retas ajustadas.}
+  \caption{Distribuição de graus em escala log-log com as retas ajustadas e a Poisson de um grafo
+  aleatório (esquerda); CCDF com o ajuste por máxima verossimilhança (direita).}
   \label{fig:potencia}
 \end{figure}
 
-\textbf{(3) Robustez.} A Tabela~\ref{tab:robustez} e a Figura~\ref{fig:robustez} resumem as métricas A
-a D. Com remoção aleatória de \rRemover{} vértices, a maior componente mantém \Srand{} dos vértices
-originais ($\pm$\SrandDP), o caminho médio quase não muda (\Lrand{} contra \Lorig) e só \isoRand{}
-dos vértices ficam isolados: a rede é robusta a falhas aleatórias. O ataque direcionado é devastador:
-removendo os mesmos \rRemover{} vértices por grau, a maior componente cai para \Sgrau, o número de
-componentes passa de 1 para \cgrau, o caminho médio triplica (\Lgrau) e \isoGrau{} dos vértices
-restantes ficam isolados. O ataque por betweenness tem efeito quase igual ($S = \Sbtw$), e o por
-PageRank é um pouco menos severo ($S = \Spr$), porque esse ranking privilegia subreddits muito citados
-mesmo quando eles não são pontes entre regiões da rede. Como
-$S_{rand} \gg S_{cent}$ e $c_{cent} \gg c_{rand}$, a rede é muito vulnerável a ataques direcionados,
-o padrão de redes com hubs descrito por \citet{albert2000}.
+\textbf{(3) Robustez.} A Tabela~\ref{tab:robustez} e a Figura~\ref{fig:robustez} resumem as métricas A a
+D para remoções de $r = \rRemover$ vértices (5\% da maior componente).
+
+\emph{Remoção aleatória.} A maior componente mantém \Srand{} dos vértices originais, com desvio de
+apenas \SrandDP{} entre as 30 repetições. Como 5\% dos vértices foram removidos, o máximo possível seria
+0,95: quase todos os vértices restantes continuam conectados. O caminho médio quase não muda (\Lrand{}
+contra \Lorig), e só \isoRand{} dos vértices ficam isolados, em geral os que dependiam de um único
+vizinho. O número de componentes sobe para cerca de \crand, mas quase todas são vértices soltos. A
+rede é robusta a falhas aleatórias: como a maioria dos vértices tem grau baixo, um sorteio quase nunca
+atinge um hub.
+
+\emph{Ataque direcionado.} Removendo os mesmos \rRemover{} vértices, agora os de maior grau, o efeito é
+devastador. A maior componente cai para \Sgrau{} do tamanho original, o número de componentes passa de 1
+para \cgrau, \isoGrau{} dos vértices restantes ficam isolados, e o caminho médio na maior componente
+triplica (\Lgrau). O ataque por betweenness tem efeito quase igual ($S = \Sbtw$), e o por PageRank é
+um pouco menos severo ($S = \Spr$), porque esse ranking privilegia subreddits muito citados mesmo
+quando eles não são pontes entre regiões da rede.
+
+Como $S_{rand} \gg S_{cent}$ e $c_{cent} \gg c_{rand}$, a rede é muito vulnerável a ataques
+direcionados, exatamente o padrão de redes com hubs descrito por \citet{albert2000}: a mesma estrutura
+que a torna tolerante a falhas a torna frágil a ataques. Para o Reddit, isso significa que a coesão da
+plataforma entre comunidades depende de poucos subreddits gerais; se eles deixassem de existir ou de
+receber links, a rede se fragmentaria em milhares de grupos desconexos.
 
 \input{tabelas/robustez.tex}
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{07_robustez.pdf}
-  \caption{Métricas A a D: boxplot da remoção aleatória (30 repetições) e linhas dos ataques.}
+  \caption{Métricas A a D: boxplot da remoção aleatória (30 repetições), média $\pm$ desvio padrão, valor
+  original (pontilhado) e resultado dos três ataques direcionados.}
   \label{fig:robustez}
 \end{figure*}
 
-\textbf{(4) Descoberta mais interessante.} Os links negativos são raros (\fracNeg) e muito
-concentrados: 1\% dos subreddits que mais enviam links negativos responde por \concNeg{} deles
-(Tabela~\ref{tab:negativos}). Quem mais ataca são comunidades de "meta-discussão" e drama
-(\texttt{\topNeg}, \texttt{circlebroke}, \texttt{drama}), cujo propósito é comentar outras comunidades;
-quem mais recebe são os grandes subreddits gerais (\texttt{askreddit}, \texttt{news},
-\texttt{worldnews}). O perfil dos hubs (Tabela~\ref{tab:hubs}) mostra a mesma divisão: os hubs de
-entrada (\texttt{\topIndegree}, \texttt{iama}, \texttt{pics}) são citados, os de saída citam. Isso
-explica a baixa reciprocidade (\reciprocidade{} das arestas têm volta) e a maior componente fortemente
-conexa pequena (\fracSCC): o conflito no Reddit flui de um pequeno grupo de comunidades
-especializadas para as grandes vitrines da plataforma, e raramente volta.
+\textbf{(4) Descoberta mais interessante.} A descoberta mais interessante está na direção e no sinal
+das arestas, que as Partes~I e III, feitas no grafo não dirigido, deixam de lado.
+
+Os links negativos são raros (\fracNeg) e muito concentrados: o 1\% dos subreddits que mais enviam links
+negativos responde por \concNeg{} deles (Tabela~\ref{tab:negativos}). Quem mais ataca são comunidades
+de "meta-discussão" e drama (\texttt{\topNeg}, \texttt{circlebroke}, \texttt{drama}), cujo propósito
+declarado é comentar o que acontece em outras comunidades. Quem mais recebe são os grandes subreddits
+gerais (\texttt{askreddit}, \texttt{news}, \texttt{worldnews}). O perfil dos hubs (Tabela~\ref{tab:hubs})
+mostra a mesma divisão por outro ângulo: hubs de entrada como \texttt{pics}, \texttt{videos} e
+\texttt{todayilearned} quase não citam ninguém (de 0 a 4 links de saída), e mesmo \texttt{\topIndegree}
+recebe seis vezes mais links do que envia; já \texttt{subredditdrama} tem três vezes mais saída que
+entrada, e quase um terço dos seus links é negativo.
+
+Essa assimetria explica três números que, isolados, pareceriam estranhos: a reciprocidade baixa (só
+\reciprocidade{} das arestas dirigidas têm volta), a maior componente fortemente conexa pequena
+(\fracSCC{} dos vértices) e o ataque por PageRank menos eficaz que o por grau. O conflito no Reddit não
+é uma troca entre pares: ele flui de um pequeno grupo de comunidades especializadas para as grandes
+vitrines da plataforma, e raramente volta.
 
 \input{tabelas/negativos.tex}
 \input{tabelas/hubs.tex}
 
 \textbf{Extra: modelos clássicos.} A Tabela~\ref{tab:modelos} e a Figura~\ref{fig:modelos} comparam o
-G13 a Erdős–Rényi, Barabási–Albert~\cite{barabasi1999} e Watts–Strogatz~\cite{watts1998}, gerados por
-código próprio com o mesmo $n$ e $m$ aproximado. Nenhum reproduz tudo: o ER não tem hubs nem
-agrupamento; o WS tem agrupamento, mas caminhos longos e graus homogêneos; o BA reproduz a cauda
-pesada e os caminhos curtos, mas não a clusterização. O G13 combina a cauda do BA com um agrupamento
-local que nenhum dos três gera.
+G13 a três modelos gerados por código próprio com o mesmo $n$ e $m$ aproximado:
+\begin{itemize}
+  \item \textbf{Erdős–Rényi}~\cite{erdos1959}: grau máximo \gmaxER, clusterização quase nula e caminho
+    médio \Ler. A CCDF cai de forma abrupta; não descreve o G13 em nenhum aspecto.
+  \item \textbf{Watts–Strogatz}~\cite{watts1998}: clusterização alta (\Cws), mas graus homogêneos e
+    caminho médio de \Lws, o dobro do G13. Reproduz o agrupamento, mas não os hubs nem os caminhos
+    curtos.
+  \item \textbf{Barabási–Albert}~\cite{barabasi1999}: cauda pesada (grau máximo \gmaxBA, $\gamma \approx
+    \gammaBA$) e caminho médio de \Lba, próximo do G13, mas clusterização de \Cba, quase 80 vezes menor.
+    É o mais próximo, por reproduzir os hubs e as distâncias.
+\end{itemize}
+Nenhum modelo reproduz tudo: o G13 combina a cauda pesada do Barabási–Albert com um agrupamento local
+que nenhum dos três gera, e que o nulo de mesmos graus mostrou ser real. Um modelo adequado precisaria
+de ligação preferencial e de formação de triângulos, como os que adicionam fechamento triádico ao
+Barabási–Albert. A CCDF do G13 também cai mais rápido que a do Barabási–Albert no extremo, coerente com
+o corte observado na Parte~III~(2).
 
 \input{tabelas/modelos.tex}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{09_modelos_ccdf.pdf}
-  \caption{CCDF dos graus do G13 e dos modelos clássicos.}
+  \caption{CCDF dos graus do G13 e dos três modelos clássicos, em escala log-log.}
   \label{fig:modelos}
 \end{figure}
 
 % =================================================================================
 \section{Discussão Crítica}
 \textbf{Escolhas de tratamento.} Usamos apenas o arquivo \emph{body}; com o \emph{title}, o grafo teria
-mais arestas, e as medidas mudariam em magnitude. A união temporal apaga a dinâmica: um link de 2014 e
-um de 2017 pesam igual. O sinal majoritário resume pares com links dos dois tipos, e a conversão para
-não dirigido perde a assimetria que, como vimos, é uma das características mais marcantes da rede.
+cerca de 20 mil vértices a mais e o triplo de posts, e as medidas mudariam em magnitude,
+embora provavelmente não em natureza. A união temporal apaga a dinâmica: um link de 2014 e um de 2017
+pesam igual, e não sabemos se a estrutura de hubs é estável ou se mudou com o crescimento da
+plataforma. O sinal majoritário resume pares com links dos dois tipos, e a conversão para não dirigido
+perde a assimetria que, como vimos na Parte~III~(4), é uma das características mais marcantes da rede.
+Os resultados das Partes~I e III devem ser lidos com essa ressalva.
 
-\textbf{Aproximações.} O caminho médio, o diâmetro e o raio são exatos, mas o $L$ usado nas
-comparações de small-world e de robustez é estimado por 200 a 300 BFS; o betweenness usa 1.000 das
-\nLCC{} fontes (85\% dos vértices mais centrais coincidem com o valor exato). Os nulos aleatórios usam
-poucas repetições, suficientes para diferenças da ordem das observadas, mas não para diferenças sutis.
+\textbf{Aproximações.} O caminho médio, o diâmetro e o raio do grafo são exatos, mas o $L$ usado nas
+comparações de small-world e de robustez é estimado com 200 a 300 BFS. O betweenness usa 1.000 das
+\nLCC{} fontes possíveis; conferimos com o valor exato (igraph) que 85\% dos vértices mais centrais
+coincidem, o que basta para o ataque direcionado, mas não para ordenar com precisão vértices de
+centralidade parecida. Os nulos aleatórios usam poucas repetições (3 a 5): suficiente para diferenças
+como 865 vezes ou 4 vezes, mas não para diferenças sutis.
 
-\textbf{Lei de potência.} A forma da distribuição é compatível com uma lei de potência, mas não
-fizemos o teste de hipótese de \citet{clauset2009} contra alternativas como a log-normal; o desvio na
-cauda extrema indica que um corte exponencial pode descrever melhor os maiores graus.
+\textbf{Lei de potência.} A forma da distribuição é compatível com uma lei de potência, e as
+estimativas robustas de $\gamma$ concordam entre si. Ainda assim, não fizemos o teste de hipótese de
+\citet{clauset2009} contra alternativas como a log-normal ou a lei de potência com corte exponencial,
+e o desvio no extremo da cauda indica que esta última pode descrever melhor os maiores graus. A
+regressão sobre $P(k)$ bruto, pedida no enunciado, mostrou-se sensível ao ruído da cauda, o que reforça
+a recomendação da literatura de usar bins logarítmicos ou máxima verossimilhança.
 
 \textbf{Tempos.} Os tempos dependem da máquina e do interpretador; o que importa é o crescimento.
-Ainda assim, o ajuste $c \cdot f(n,m)$ mostrou que a forma dos subgrafos de teste influencia a curva
-observada, e isso deve ser considerado ao ler qualquer análise de complexidade empírica.
+Ainda assim, a análise de complexidade mostrou que a forma dos subgrafos de teste e as constantes do
+Python influenciam a curva observada, a ponto de um algoritmo linear parecer superlinear num ajuste
+ingênuo. Isso deve ser considerado ao ler qualquer análise de complexidade empírica.
+
+\textbf{Interpretação dos sinais.} Os rótulos de sinal vêm de um classificador de texto de
+\citet{kumar2018}, e não de anotação manual; um link marcado como negativo indica tom hostil, não
+necessariamente uma "brigada". As conclusões da Parte~III~(4) descrevem padrões agregados e não devem
+ser lidas como julgamento sobre comunidades específicas.
 
 % =================================================================================
 \section{Conclusão}
 A rede de hiperlinks entre subreddits é esparsa, quase conexa e de mundo pequeno: qualquer comunidade
-está a cerca de quatro saltos de outra. A distribuição de graus tem cauda pesada ($\gamma \approx
-\gammaMLE$), e essa estrutura de hubs a torna robusta a falhas aleatórias e muito frágil a ataques
-direcionados. Os algoritmos implementados confirmaram as complexidades teóricas, com a ressalva de que
-custos constantes por vértice pesam em Python. A descoberta mais interessante é a assimetria do conflito:
-poucas comunidades de meta-discussão geram a maior parte dos links negativos, dirigidos às grandes
-comunidades gerais, que raramente respondem. Trabalhos futuros podem incluir o arquivo \emph{title},
-uma análise temporal e um teste formal da lei de potência.
+está a cerca de quatro saltos de outra. A comparação com um nulo de mesmos graus refinou essa
+conclusão: os caminhos curtos vêm dos hubs, mas há um agrupamento local que os graus sozinhos não
+explicam. A distribuição de graus tem cauda pesada ($\gamma \approx \gammaMLE$), e essa estrutura de
+hubs torna a rede robusta a falhas aleatórias e muito frágil a ataques direcionados: remover 5\% dos
+vértices mais conectados reduz a maior componente a pouco mais de um terço.
+
+Os algoritmos implementados produziram resultados consistentes entre si (Dijkstra e Bellman-Ford,
+Prim e Kruskal) e com o NetworkX, e as medições confirmaram as complexidades teóricas, com a ressalva
+de que custos constantes por vértice pesam em Python e de que a forma dos dados de teste afeta a curva
+observada. O Bellman-Ford mostrou seu valor prático ao detectar ciclos negativos no grafo com sinal.
+
+A descoberta mais interessante é a assimetria do conflito: poucas comunidades de meta-discussão geram
+a maior parte dos links negativos, dirigidos às grandes comunidades gerais, que raramente respondem.
+Trabalhos futuros podem incluir o arquivo \emph{title}, uma análise temporal da formação dos hubs e do
+conflito, e um teste formal da lei de potência contra alternativas.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{referencias}
