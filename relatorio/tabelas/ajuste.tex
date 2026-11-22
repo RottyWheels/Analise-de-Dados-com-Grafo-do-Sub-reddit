@@ -1,0 +1,27 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Complexidade observada: ajuste do tempo médio a $c \cdot f(n,m)$ e a $a n + b m$.}
+\label{tab:ajuste}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrr}
+\toprule
+Algoritmo & $c$ & $R^2$ de $c\cdot f$ & $R^2$ de $an+bm$ \\
+\midrule
+BFS & $1,80 \times 10^{-7}$ & 0,887 & 1 \\
+DFS & $1,66 \times 10^{-7}$ & 0,853 & 0,999 \\
+Euler (não dirigido) & $2,26 \times 10^{-7}$ & 0,854 & 0,999 \\
+Euler (dirigido) & $6,19 \times 10^{-7}$ & 0,898 & 0,999 \\
+Tarjan (SCC) & $3,50 \times 10^{-7}$ & 0,815 & 0,997 \\
+Tarjan (pontes e articulações) & $4,28 \times 10^{-7}$ & 0,918 & 0,991 \\
+Dijkstra & $5,64 \times 10^{-8}$ & 0,944 & 0,999 \\
+Bellman-Ford & $1,02 \times 10^{-10}$ & 0,88 & 0,996 \\
+Kruskal & $4,45 \times 10^{-8}$ & 0,945 & 0,998 \\
+Prim & $1,35 \times 10^{-7}$ & 0,988 & 0,998 \\
+Floyd-Warshall & $1,80 \times 10^{-9}$ & 1 &  \\
+Floyd-Warshall puro & $3,45 \times 10^{-8}$ & 0,988 &  \\
+Bellman-Ford (c·k·m) & $2,53 \times 10^{-6}$ & 0,819 &  \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{G13 comparado aos modelos clássicos gerados com o mesmo $n$ e $m$ aproximado.}
+\label{tab:modelos}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Modelo & n & m & grau máx & C médio & L & γ (bins log) & R² (bins log) & γ (MLE) \\
+\midrule
+G13 (maior componente) & 34.671 & 123.570 & 2.336 & 0,186 & 3,96 & 2,11 & 0,992 & 2,22 \\
+Erdős–Rényi G(n,m) & 34.671 & 123.570 & 22 & $1,65 \times 10^{-4}$ & 5,52 & 1,46 & 0,195 & 2,92 \\
+Barabási–Albert (m=4) & 34.671 & 138.668 & 620 & 0,00235 & 4,27 & 2,87 & 0,99 & 2,88 \\
+Watts–Strogatz (k=8, p=0,1) & 34.671 & 138.684 & 12 & 0,473 & 8,07 & -5,03 & 0,361 & 5,71 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}

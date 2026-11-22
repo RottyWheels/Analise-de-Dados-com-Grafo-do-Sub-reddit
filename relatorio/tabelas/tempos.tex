@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Tempo de execução: 30 repetições, IC de 95\% pela Normal ($z_{0{,}025}=1{,}96$).}
+\label{tab:tempos}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lllrrrr}
+\toprule
+Algoritmo & Complexidade & Grafo & Média (ms) & Desvio (ms) & IC inf. (ms) & IC sup. (ms) \\
+\midrule
+BFS & O(n + m) & maior componente & 32,94 & 1,672 & 32,35 & 33,54 \\
+DFS & O(n + m) & maior componente & 30,81 & 1,53 & 30,27 & 31,36 \\
+Euler (não dirigido) & O(n + m) & G\_und & 51,48 & 10,19 & 47,83 & 55,13 \\
+Euler (dirigido) & O(n + m) & G\_dir & 112,3 & 7,221 & 109,7 & 114,9 \\
+Dijkstra & O((n + m) log n) & maior componente & 134,1 & 12,11 & 129,8 & 138,4 \\
+Bellman-Ford & O(n · m) & maior componente & 409,1 & 58,86 & 388,1 & 430,2 \\
+Tarjan (SCC) & O(n + m) & G\_dir & 65,84 & 3,956 & 64,42 & 67,25 \\
+Tarjan (pontes e articulações) & O(n + m) & maior componente & 76,63 & 6,794 & 74,2 & 79,06 \\
+Kruskal & O(m log m) & maior componente & 104,3 & 11,61 & 100,2 & 108,5 \\
+Prim & O(m log n) & maior componente & 249,4 & 27,19 & 239,7 & 259,1 \\
+Floyd-Warshall (n=100) & O(n³) & subgrafo n=100 & 2,505 & 0,1521 & 2,451 & 2,559 \\
+Floyd-Warshall (n=250) & O(n³) & subgrafo n=250 & 21,6 & 0,8804 & 21,29 & 21,92 \\
+Floyd-Warshall (n=500) & O(n³) & subgrafo n=500 & 211,1 & 17,05 & 205 & 217,2 \\
+Floyd-Warshall (n=1000) & O(n³) & subgrafo n=1000 & 1.900,8 & 80,33 & 1.872,1 & 1.929,6 \\
+Floyd-Warshall puro (n=100) & O(n³) & subgrafo n=100 & 27,83 & 1,825 & 27,18 & 28,49 \\
+Floyd-Warshall puro (n=250) & O(n³) & subgrafo n=250 & 147,3 & 11,4 & 143,2 & 151,3 \\
+Floyd-Warshall puro (n=500) & O(n³) & subgrafo n=500 & 4.677,3 & 227,2 & 4.596,0 & 4.758,6 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}

@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Tratamentos aplicados ao arquivo original.}
+\label{tab:tratamento}
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lll}
+\toprule
+Tratamento & Descrição & Resultado \\
+\midrule
+Temporal → estático & União de todos os posts de 31/12/2013 a 30/04/2017 & 286.561 posts \\
+Remoção de auto-loops & Verificado: o arquivo não tem auto-loops & 0 removidos \\
+Multigrafo → simples (dirigido) & Uma aresta por par (u→v); count = nº de posts; sign = sinal majoritário & 137.821 arestas \\
+Dirigido → não dirigido & Junta u→v e v→u; count somado; sign pelo saldo ponderado & 124.330 arestas \\
+Pesos & w = 1/count (pares com mais links ficam mais próximos) & Dijkstra, Bellman-Ford, Floyd-Warshall, AGM \\
+Maior componente conexa & Usada em distâncias, small-world e robustez & 34.671 vértices / 123.570 arestas \\
+Subgrafos de teste & Subgrafos induzidos conexos por BFS (n = 100 a 16.000) & Floyd-Warshall e curvas de tempo \\
+Atributos descartados & Vetor PROPERTIES (86 atributos de texto) e POST\_ID & economia de memória \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table*}

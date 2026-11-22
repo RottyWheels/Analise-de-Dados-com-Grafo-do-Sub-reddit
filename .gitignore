@@ -4,3 +4,11 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+relatorio/*.aux
+relatorio/*.log
+relatorio/*.fls
+relatorio/*.fdb_latexmk
+relatorio/*.out
+relatorio/*.bbl
+relatorio/*.blg
+relatorio/main.pdf
