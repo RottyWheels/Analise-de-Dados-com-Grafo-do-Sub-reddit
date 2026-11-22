@@ -62,8 +62,10 @@ def test_escala_preserva_n_do_grafo():
 def test_macros_latex(tmp_path):
     import pytest
     from src.relatorio import escrever_macros
-    p = escrever_macros({"diametro": 11, "caminhoMedio": 3.9136, "texto": "G13"}, tmp_path / "v.tex")
+    p = escrever_macros({"diametro": 11, "caminhoMedio": 3.9136, "texto": "G13", "fracao": "96,9%"},
+                        tmp_path / "v.tex")
     t = p.read_text(encoding="utf-8")
-    assert "\\newcommand{\\diametro}{11}" in t and "{3,91}" in t and "{G13}" in t
+    assert "\\newcommand{\\diametro}{11}" in t and "{3{,}91}" in t and "{G13}" in t
+    assert "{96{,}9\\%}" in t
     with pytest.raises(ValueError):
         escrever_macros({"com_sublinhado": 1}, tmp_path / "x.tex")

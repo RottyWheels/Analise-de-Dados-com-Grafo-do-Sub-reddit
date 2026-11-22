@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numbers
+import re
 from pathlib import Path
 
 import numpy as np
@@ -98,6 +99,8 @@ def escrever_macros(valores: dict, caminho: Path = RES / "valores.tex", casas: i
         if not nome.isalpha():
             raise ValueError(f"nome de macro inválido: {nome}")
         val = v if isinstance(v, str) else _macro_valor(v, casas)
+        val = val.replace("\\%", "%").replace("%", "\\%")   # % inicia comentário no LaTeX
+        val = re.sub(r"(\d),(\d)", r"\1{,}\2", val)            # vírgula decimal sem espaço em modo matemático
         linhas.append(f"\\newcommand{{\\{nome}}}{{{val}}}")
     caminho.write_text("\n".join(linhas) + "\n", encoding="utf-8")
     return caminho
