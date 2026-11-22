@@ -5,7 +5,7 @@
 **Dataset:** https://snap.stanford.edu/data/soc-RedditHyperlinks.html — arquivo usado: `soc-redditHyperlinks-body.tsv`
 **Entrega:** `224216276.pdf` no Moodle (template WebMedia/Overleaf) + link deste repositório
 
-> Status em 21/11/2026: código, notebook, dados tratados, figuras e tabelas prontos. Itens sem marcação são de escrita do relatório (interpretações e PDF).
+> Status em 22/11/2026: código, testes, notebook, dados tratados, figuras (PNG/PDF) e tabelas LaTeX prontos. Itens sem marcação são de escrita do relatório (interpretações e PDF).
 >
 > Itens marcados com **[R]** devem aparecer obrigatoriamente no relatório.
 
@@ -22,7 +22,9 @@
 - [x] `.gitignore` (ignorar `data/raw/*.tsv`, checkpoints do Jupyter, `__pycache__`)
 - [x] `data/raw/` — script de download do `.tsv` (arquivo de 319 MB > limite de 100 MB do GitHub)
 - [x] `data/processed/` — listas de arestas tratadas (versionadas)
-- [x] `src/algoritmos.py`, `src/metricas.py`, `src/robustez.py`
+- [x] `src/` com toda a lógica: algoritmos, métricas, distâncias, centralidade, modelos, robustez, medição, tabelas e figuras
+- [x] `tests/` — suíte pytest comparando as implementações próprias com networkx
+- [x] Tabela "requisito → notebook/código/saída" no README
 - [x] `notebook.ipynb` executável do início ao fim
 - [x] `figuras/` — PNGs usados no relatório
 
@@ -72,7 +74,8 @@ Implementação própria em `src/algoritmos.py`, validada contra networkx.
 - [x] Tempo real: 30 repetições → média, desvio padrão e IC
   - n ≥ 30 → Normal: x̄ ± z_{α/2} · σ/√n
   - n < 30 e σ desconhecido → t-Student: x̄ ± t_{α/2} · σ/√n
-- [x] Gráfico tempo × tamanho (teórico vs. observado)
+- [x] Gráfico tempo × tamanho (teórico vs. observado), com IC por tamanho (t-Student) e ajuste c·f(n,m)
+- [x] Aquecimento e coletor de lixo desligado nas medições
 
 ## 6. Parte III – Análise estrutural **[R]**
 ### 6.1 Small-world (Apêndice A) — código próprio, sem biblioteca pronta
