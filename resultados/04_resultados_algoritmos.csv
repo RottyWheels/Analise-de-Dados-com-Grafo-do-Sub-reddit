@@ -1,0 +1,11 @@
+Algoritmo,Resultado
+BFS,origem = askreddit; alcança 34671 vértices; excentricidade = 6
+DFS,origem = askreddit; visita 34671 vértices
+Euler (não dirigido),"25306 vértices de grau ímpar; conexo=False → euleriano=False, semi=False"
+Euler (dirigido),32257 vértices com entrada≠saída; fracamente conexo=False → euleriano=False
+Dijkstra,w = 1/count; distância máxima a partir de askreddit = 4.590
+Bellman-Ford,mesmas distâncias que Dijkstra: True; convergiu em 6 iterações; ciclo negativo = False
+Floyd-Warshall,"executado só em subgrafos (n ≤ 2000): O(n³) e matriz n×n de 34.671² ≈ 1,2·10⁹ células (~9,6 GB) inviáveis"
+Tarjan (SCC),24071 componentes fortemente conexas; maior = 11564 vértices (32.3%); 23949 SCCs unitárias; 497 componentes fracamente conexas
+Kruskal,34670 arestas; peso total = 25435.5313
+Prim,34670 arestas; peso total = 25435.5313 (igual ao Kruskal: True)

@@ -1,0 +1,11 @@
+,grau de entrada,grau de saída,PageRank,betweenness
+1,askreddit (2161),subredditdrama (1350),askreddit (0.01664),askreddit (7.298e+07)
+2,iama (1646),copypasta (636),iama (0.01342),iama (5.341e+07)
+3,pics (953),drama (600),videos (0.008163),subredditdrama (4.483e+07)
+4,videos (879),subredditoftheday (559),pics (0.006779),writingprompts (2.526e+07)
+5,todayilearned (816),outoftheloop (507),leagueoflegends (0.005295),outoftheloop (2.234e+07)
+6,funny (757),circlejerkcopypasta (472),todayilearned (0.004728),videos (1.74e+07)
+7,writingprompts (717),tipofmypenis (472),mhoc (0.004366),leagueoflegends (1.631e+07)
+8,worldnews (661),shitliberalssay (470),worldnews (0.004024),gaming (1.53e+07)
+9,mhoc (595),justunsubbed (464),writingprompts (0.004),pics (1.426e+07)
+10,outoftheloop (592),conspiracy (433),funny (0.003963),tipofmypenis (1.398e+07)

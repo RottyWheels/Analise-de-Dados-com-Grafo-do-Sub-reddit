@@ -1,0 +1,18 @@
+Medida,Valor,Grafo,Calculado?
+Número de vértices,35776,G_und,sim
+Número de arestas,124330,G_und,sim
+Grau mínimo,1,G_und,sim
+Grau máximo,2336,G_und,sim
+Grau médio,6.9505,G_und,sim
+Distribuição de graus,ver figura 03,G_und,sim
+Densidade,1.943e-04,G_und,sim
+Número de componentes conexas,497,G_und,sim
+Tamanho de cada componente,ver tabela 03,G_und,sim
+Tamanho da maior componente,34671 (96.9%),G_und,sim
+Diâmetro,11,maior componente,sim (exato)
+Raio,6,maior componente,sim (exato)
+Comprimento médio dos caminhos,3.9136,maior componente,sim (exato)
+Coeficiente de clusterização médio,0.1809,G_und,sim
+Transitividade (clusterização global),0.0584,G_und,sim (extra)
+Número de triângulos,406391,G_und,sim
+Visualização,ver figura 03b (versão reduzida),top 150 por grau,sim
