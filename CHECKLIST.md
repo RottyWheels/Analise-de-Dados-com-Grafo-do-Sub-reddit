@@ -119,11 +119,11 @@ Implementação própria em `src/algoritmos.py`, validada contra networkx.
 - [x] Conclusão
 - [x] PDF nomeado `224216276.pdf` (relatorio/224216276.pdf)
 - [x] Preencher autor e e-mail em `relatorio/main.tex`
-- [ ] Revisar o texto do relatório (interpretações com as próprias palavras)
-- [ ] Compilar no Overleaf com o template WebMedia e enviar no Moodle
+- [x] Revisar o texto do relatório
+- [x] Compilar no Overleaf com o template WebMedia e enviar no Moodle
 
 ## 8. Revisão final
 - [x] Notebook roda do zero (Kernel → Restart & Run All)
-- [ ] README testado seguindo os passos
+- [x] README testado seguindo os passos
 - [x] Todas as figuras do relatório estão em `figuras/`
 - [x] Todos os itens **[R]** presentes no PDF
